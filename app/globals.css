@@ -1,0 +1,295 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+  --primary: #1db954;
+  --dark: #121212;
+  --darker: #000;
+  --light: #f2f2f2;
+  --gray: #b3b3b3;
+  --card-bg: #1f1f1f;
+}
+
+body {
+  background-color: var(--dark);
+  color: var(--light);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: rgba(0, 0, 0, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+}
+
+.logo i {
+  color: var(--primary);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+}
+
+.btn-outline:hover {
+  background: white;
+  color: black;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: black;
+}
+
+.btn-primary:hover {
+  background: #1ed760;
+}
+
+.content-area {
+  padding: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 120px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background-color: #333;
+  transform: translateY(-3px);
+}
+
+.card-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 5px;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+}
+
+.card-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* Auth forms */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.auth-card {
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.auth-card h1 {
+  margin-bottom: 25px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.auth-card label {
+  display: block;
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 6px;
+  margin-top: 15px;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background: #282828;
+  color: white;
+  font-size: 14px;
+}
+
+.auth-card button {
+  width: 100%;
+  margin-top: 25px;
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  background: var(--primary);
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.auth-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.error-msg {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff8080;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-top: 15px;
+}
+
+/* Upload form */
+.upload-card {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 500px;
+}
+
+.upload-card input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background: #282828;
+  color: white;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.upload-card input[type="file"] {
+  margin-bottom: 20px;
+  color: var(--gray);
+}
+
+/* Player bar */
+.player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 30px;
+  background-color: #181818;
+  border-top: 1px solid #282828;
+  gap: 20px;
+}
+
+.now-playing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.now-playing .card-img {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 0;
+  font-size: 18px;
+}
+
+.song-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.song-artist {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.player-audio {
+  flex: 1;
+  max-width: 500px;
+}
+
+audio {
+  width: 100%;
+  }
