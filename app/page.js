@@ -15,6 +15,7 @@ export default function HomePage() {
       const { data, error } = await supabase
         .from('songs')
         .select('id, title, artist, storage_path, created_at')
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (!error) setSongs(data);
@@ -31,16 +32,25 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <div className="content-area">
-        <h1 className="section-title">All songs</h1>
 
-        {loading && <p style={{ color: 'var(--gray)' }}>Loading songs...</p>}
+      <div className="hero">
+        <div className="hero-eyebrow">Every genre, one stream</div>
+        <h1 className="hero-title">Sounds worth<br />hitting play on.</h1>
+        <p className="hero-sub">
+          Discover tracks uploaded by people like you — every song reviewed before it goes live.
+        </p>
+      </div>
+
+      <div className="content-area">
+        <h2 className="section-title">All songs</h2>
+
+        {loading && <p style={{ color: 'var(--text-muted)' }}>Loading songs...</p>}
 
         {!loading && songs.length === 0 && (
-          <p style={{ color: 'var(--gray)' }}>
-            No songs yet.{' '}
-            <a href="/upload" style={{ color: 'var(--primary)' }}>
-              Be the first to upload one.
+          <p style={{ color: 'var(--text-muted)' }}>
+            No approved songs yet.{' '}
+            <a href="/upload" style={{ color: 'var(--accent)' }}>
+              Upload one for review.
             </a>
           </p>
         )}
@@ -61,4 +71,4 @@ export default function HomePage() {
       <Player currentSong={currentSong} />
     </>
   );
-        }
+    }
