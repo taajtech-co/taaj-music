@@ -516,3 +516,38 @@ audio {
 .content-area {
   padding-bottom: 160px;
 }
+/* ===== Search bar ===== */
+.search-wrap {
+  padding: 0 24px;
+  max-width: 1100px;
+  margin: 0 auto 24px;
+}
+
+.search-input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px;
+}
+
+.search-input-box i {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.search-input-box input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+}
+
+.search-input-box input::placeholder {
+  color: var(--text-muted);
+  }
