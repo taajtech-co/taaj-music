@@ -10,6 +10,7 @@ export default function UploadPage() {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [file, setFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -35,6 +36,10 @@ export default function UploadPage() {
       setError('Please upload an audio file (mp3, wav, m4a, etc).');
       return;
     }
+    if (coverFile && !coverFile.type.startsWith('image/')) {
+      setError('Cover art must be an image file.');
+      return;
+    }
 
     setUploading(true);
 
@@ -51,11 +56,27 @@ export default function UploadPage() {
       return;
     }
 
+    let coverPath = null;
+    if (coverFile) {
+      const coverExt = coverFile.name.split('.').pop();
+      coverPath = `${session.user.id}/${Date.now()}-cover.${coverExt}`;
+      const { error: coverError } = await supabase.storage
+        .from('covers')
+        .upload(coverPath, coverFile);
+      if (coverError) {
+        setError(coverError.message);
+        setUploading(false);
+        return;
+      }
+    }
+
     const { error: insertError } = await supabase.from('songs').insert({
       title,
       artist,
       storage_path: filePath,
+      cover_path: coverPath,
       uploader_id: session.user.id,
+      status: 'pending',
     });
 
     if (insertError) {
@@ -64,8 +85,12 @@ export default function UploadPage() {
       return;
     }
 
-    setSuccess('Song uploaded! Redirecting...');
-    setTimeout(() => (window.location.href = '/'), 1000);
+    setSuccess('Song submitted! It will appear once approved by an admin.');
+    setTitle('');
+    setArtist('');
+    setFile(null);
+    setCoverFile(null);
+    setUploading(false);
   };
 
   if (checking) return null;
@@ -75,6 +100,9 @@ export default function UploadPage() {
       <Navbar />
       <div className="content-area">
         <h1 className="section-title">Upload a song</h1>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
+          Your song will be reviewed before it appears publicly.
+        </p>
         <form className="upload-card" onSubmit={handleUpload}>
           <input
             type="text"
@@ -90,23 +118,37 @@ export default function UploadPage() {
             onChange={(e) => setArtist(e.target.value)}
             required
           />
+
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+            Audio file
+          </label>
           <input
             type="file"
             accept="audio/*"
             onChange={(e) => setFile(e.target.files[0])}
             required
           />
+
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', marginTop: '10px' }}>
+            Cover art (optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files[0])}
+          />
+
           {error && <div className="error-msg">{error}</div>}
           {success && (
-            <div className="error-msg" style={{ background: 'rgba(29,185,84,0.15)', color: 'var(--primary)' }}>
+            <div className="error-msg" style={{ background: 'rgba(47,209,197,0.12)', color: 'var(--accent-2)' }}>
               {success}
             </div>
           )}
-          <button className="btn btn-primary" type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', borderRadius: '20px' }}>
+          <button className="btn btn-primary" type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', borderRadius: '999px' }}>
             {uploading ? 'Uploading...' : 'Upload'}
           </button>
         </form>
       </div>
     </>
   );
-                                     }
+                                         }
