@@ -3,18 +3,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Navbar from '../components/Navbar';
-import Player from '../components/Player';
+import { useSongPlayer } from '../context/PlayerContext';
 
 export default function HomePage() {
   const [songs, setSongs] = useState([]);
-  const [currentSong, setCurrentSong] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { setCurrentSong } = useSongPlayer();
 
   useEffect(() => {
     const loadSongs = async () => {
       const { data, error } = await supabase
         .from('songs')
-        .select('id, title, artist, storage_path, created_at')
+        .select('id, title, artist, storage_path, cover_path, created_at')
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
@@ -24,9 +24,14 @@ export default function HomePage() {
     loadSongs();
   }, []);
 
+  const coverUrl = (song) => {
+    if (!song.cover_path) return null;
+    return supabase.storage.from('covers').getPublicUrl(song.cover_path).data.publicUrl;
+  };
+
   const playSong = (song) => {
     const { data } = supabase.storage.from('songs').getPublicUrl(song.storage_path);
-    setCurrentSong({ title: song.title, artist: song.artist, url: data.publicUrl });
+    setCurrentSong({ title: song.title, artist: song.artist, url: data.publicUrl, cover: coverUrl(song) });
   };
 
   return (
@@ -58,8 +63,8 @@ export default function HomePage() {
         <div className="cards-grid">
           {songs.map((song) => (
             <div className="card" key={song.id} onClick={() => playSong(song)}>
-              <div className="card-img">
-                <i className="fas fa-music"></i>
+              <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
+                {!coverUrl(song) && <i className="fas fa-music"></i>}
               </div>
               <div className="card-title">{song.title}</div>
               <div className="card-desc">{song.artist}</div>
@@ -67,8 +72,6 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-
-      <Player currentSong={currentSong} />
     </>
   );
     }
