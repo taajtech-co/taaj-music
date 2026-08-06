@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import Navbar from '../../components/Navbar';
 
 export default function SettingsPage() {
-  const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(true);
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -15,23 +14,23 @@ export default function SettingsPage() {
     setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
       setChecking(false);
       if (!data.session) {
         window.location.href = '/login';
-      } else {
-        supabase
-          .from('profiles')
-          .select('username, is_admin')
-          .eq('id', data.session.user.id)
-          .single()
-          .then(({ data: profile }) => {
-            if (profile) {
-              setUsername(profile.username);
-              setIsAdmin(profile.is_admin);
-            }
-          });
+        return;
       }
+      setEmail(data.session.user.email);
+      supabase
+        .from('profiles')
+        .select('username, is_admin')
+        .eq('id', data.session.user.id)
+        .single()
+        .then(({ data: profile }) => {
+          if (profile) {
+            setUsername(profile.username);
+            setIsAdmin(profile.is_admin);
+          }
+        });
     });
   }, []);
 
@@ -51,53 +50,69 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Navbar />
-      <div className="content-area">
-        <h1 className="section-title">Settings</h1>
+      <div className="settings-topbar">
+        <a href="/" className="settings-back"><i className="fas fa-arrow-left"></i></a>
+        <div className="settings-topbar-title">Settings</div>
+        <div style={{ width: '32px' }}></div>
+      </div>
 
-        <div className="card" style={{ cursor: 'default', marginBottom: '16px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-            ACCOUNT
-          </div>
-          <div style={{ fontWeight: 600 }}>@{username}</div>
-        </div>
-
-        <div
-          className="card"
-          style={{ cursor: 'pointer', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          onClick={toggleTheme}
-        >
+      <div className="settings-list">
+        <div className="settings-row" style={{ cursor: 'default' }}>
+          <div className="settings-row-icon"><i className="fas fa-user"></i></div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-              APPEARANCE
-            </div>
-            <div style={{ fontWeight: 600 }}>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</div>
+            <div className="settings-row-title">@{username}</div>
+            <div className="settings-row-sub">{email}</div>
           </div>
-          <i className={theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'} style={{ fontSize: '18px' }}></i>
         </div>
 
-        <a href="/upload" className="card" style={{ display: 'block', marginBottom: '16px' }}>
-          <div style={{ fontWeight: 600 }}><i className="fas fa-upload" style={{ marginRight: '10px', color: 'var(--text-muted)' }}></i>Upload a song</div>
+        <button className="settings-row" onClick={toggleTheme}>
+          <div className="settings-row-icon">
+            <i className={theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'}></i>
+          </div>
+          <div>
+            <div className="settings-row-title">Appearance</div>
+            <div className="settings-row-sub">{theme === 'dark' ? 'Dark mode' : 'Light mode'} · tap to switch</div>
+          </div>
+        </button>
+
+        <a href="/upload" className="settings-row">
+          <div className="settings-row-icon"><i className="fas fa-circle-plus"></i></div>
+          <div>
+            <div className="settings-row-title">Upload a song</div>
+            <div className="settings-row-sub">Submit a track for review</div>
+          </div>
         </a>
 
-        <a href="/my-uploads" className="card" style={{ display: 'block', marginBottom: '16px' }}>
-          <div style={{ fontWeight: 600 }}><i className="fas fa-record-vinyl" style={{ marginRight: '10px', color: 'var(--text-muted)' }}></i>My Uploads</div>
+        <a href="/my-uploads" className="settings-row">
+          <div className="settings-row-icon"><i className="fas fa-record-vinyl"></i></div>
+          <div>
+            <div className="settings-row-title">My Uploads</div>
+            <div className="settings-row-sub">Status &amp; deletion requests</div>
+          </div>
         </a>
 
         {isAdmin && (
-          <a href="/admin" className="card" style={{ display: 'block', marginBottom: '16px' }}>
-            <div style={{ fontWeight: 600 }}><i className="fas fa-shield-halved" style={{ marginRight: '10px', color: 'var(--text-muted)' }}></i>Admin review</div>
+          <a href="/admin" className="settings-row">
+            <div className="settings-row-icon"><i className="fas fa-shield-halved"></i></div>
+            <div>
+              <div className="settings-row-title">Admin review</div>
+              <div className="settings-row-sub">Approve uploads &amp; deletions</div>
+            </div>
           </a>
         )}
 
-        <button
-          className="btn btn-outline"
-          onClick={handleLogout}
-          style={{ width: '100%', padding: '12px', marginTop: '10px' }}
-        >
-          Log out
-        </button>
+        <div className="settings-row" style={{ cursor: 'default' }}>
+          <div className="settings-row-icon"><i className="fas fa-circle-info"></i></div>
+          <div>
+            <div className="settings-row-title">About</div>
+            <div className="settings-row-sub">Taaj Music · v1.0</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="logout-pill-wrap">
+        <button className="logout-pill" onClick={handleLogout}>Log out</button>
       </div>
     </>
   );
-}
+    }
