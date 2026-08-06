@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 export default function Navbar() {
   const [session, setSession] = useState(null);
   const [username, setUsername] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -20,15 +21,19 @@ export default function Navbar() {
   useEffect(() => {
     if (!session) {
       setUsername('');
+      setIsAdmin(false);
       return;
     }
     supabase
       .from('profiles')
-      .select('username')
+      .select('username, is_admin')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
-        if (data) setUsername(data.username);
+        if (data) {
+          setUsername(data.username);
+          setIsAdmin(data.is_admin);
+        }
       });
   }, [session]);
 
@@ -46,27 +51,23 @@ export default function Navbar() {
       <div className="nav-actions">
         {session ? (
           <>
-            <a href="/upload" className="btn btn-outline">
-              Upload
-            </a>
+            <a href="/upload" className="btn btn-outline">Upload</a>
+            <a href="/my-uploads" className="btn btn-outline">My Uploads</a>
+            {isAdmin && (
+              <a href="/admin" className="btn btn-outline">Admin</a>
+            )}
             <span style={{ fontSize: '14px', color: 'var(--gray)' }}>
               {username && `@${username}`}
             </span>
-            <button className="btn btn-primary" onClick={handleLogout}>
-              Log out
-            </button>
+            <button className="btn btn-primary" onClick={handleLogout}>Log out</button>
           </>
         ) : (
           <>
-            <a href="/login" className="btn btn-outline">
-              Log in
-            </a>
-            <a href="/signup" className="btn btn-primary">
-              Sign up
-            </a>
+            <a href="/login" className="btn btn-outline">Log in</a>
+            <a href="/signup" className="btn btn-primary">Sign up</a>
           </>
         )}
       </div>
     </header>
   );
-        }
+  }
