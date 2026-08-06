@@ -1,5 +1,6 @@
 import './globals.css';
 import { PlayerProvider } from '../context/PlayerContext';
+import BottomNav from '../components/BottomNav';
 
 export const metadata = {
   title: 'Taaj Music',
@@ -30,7 +31,8 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <PlayerProvider>{children}</PlayerProvider>
+        <BottomNav />
       </body>
     </html>
   );
-          }
+            }
