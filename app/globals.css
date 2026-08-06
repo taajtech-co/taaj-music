@@ -551,3 +551,81 @@ audio {
 .search-input-box input::placeholder {
   color: var(--text-muted);
   }
+/* ===== Settings page ===== */
+.settings-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-topbar-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.settings-back {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  width: 32px;
+}
+
+.settings-list {
+  padding: 8px 0;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-row:hover {
+  background: var(--surface-2);
+}
+
+.settings-row-icon {
+  width: 22px;
+  text-align: center;
+  color: var(--text);
+  font-size: 17px;
+}
+
+.settings-row-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.settings-row-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.logout-pill-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 28px 20px;
+}
+
+.logout-pill {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
