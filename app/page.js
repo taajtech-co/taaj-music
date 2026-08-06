@@ -8,6 +8,7 @@ import { useSongPlayer } from '../context/PlayerContext';
 export default function HomePage() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
   const { setCurrentSong } = useSongPlayer();
 
   useEffect(() => {
@@ -34,6 +35,12 @@ export default function HomePage() {
     setCurrentSong({ title: song.title, artist: song.artist, url: data.publicUrl, cover: coverUrl(song) });
   };
 
+  const filteredSongs = songs.filter((song) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
+  });
+
   return (
     <>
       <Navbar />
@@ -46,22 +53,36 @@ export default function HomePage() {
         </p>
       </div>
 
+      <div className="search-wrap">
+        <div className="search-input-box">
+          <i className="fas fa-magnifying-glass"></i>
+          <input
+            type="text"
+            placeholder="Search songs or artists..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="content-area">
-        <h2 className="section-title">All songs</h2>
+        <h2 className="section-title">{query ? `Results for "${query}"` : 'All songs'}</h2>
 
         {loading && <p style={{ color: 'var(--text-muted)' }}>Loading songs...</p>}
 
-        {!loading && songs.length === 0 && (
+        {!loading && filteredSongs.length === 0 && (
           <p style={{ color: 'var(--text-muted)' }}>
-            No approved songs yet.{' '}
-            <a href="/upload" style={{ color: 'var(--accent)' }}>
-              Upload one for review.
-            </a>
+            {query ? 'No songs match your search.' : (
+              <>
+                No approved songs yet.{' '}
+                <a href="/upload" style={{ color: 'var(--accent)' }}>Upload one for review.</a>
+              </>
+            )}
           </p>
         )}
 
         <div className="cards-grid">
-          {songs.map((song) => (
+          {filteredSongs.map((song) => (
             <div className="card" key={song.id} onClick={() => playSong(song)}>
               <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
                 {!coverUrl(song) && <i className="fas fa-music"></i>}
@@ -74,4 +95,4 @@ export default function HomePage() {
       </div>
     </>
   );
-    }
+      }
