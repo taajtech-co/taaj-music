@@ -1,4 +1,5 @@
 import './globals.css';
+import { PlayerProvider } from '../context/PlayerContext';
 
 export const metadata = {
   title: 'Taaj Music',
@@ -27,7 +28,9 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <PlayerProvider>{children}</PlayerProvider>
+      </body>
     </html>
   );
-            }
+          }
