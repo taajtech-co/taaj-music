@@ -15,7 +15,7 @@ export default function HomePage() {
     const loadSongs = async () => {
       const { data, error } = await supabase
         .from('songs')
-        .select('id, title, artist, storage_path, cover_path, created_at')
+        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at')
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
@@ -32,7 +32,14 @@ export default function HomePage() {
 
   const playSong = (song) => {
     const { data } = supabase.storage.from('songs').getPublicUrl(song.storage_path);
-    setCurrentSong({ title: song.title, artist: song.artist, url: data.publicUrl, cover: coverUrl(song) });
+    setCurrentSong({
+      title: song.title,
+      artist: song.artist,
+      url: data.publicUrl,
+      cover: coverUrl(song),
+      lyrics: song.lyrics,
+      timedLyrics: song.timed_lyrics,
+    });
   };
 
   const filteredSongs = songs.filter((song) => {
@@ -95,4 +102,4 @@ export default function HomePage() {
       </div>
     </>
   );
-      }
+    }
