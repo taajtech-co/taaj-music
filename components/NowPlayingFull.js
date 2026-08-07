@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSongPlayer } from '../context/PlayerContext';
 import { parseTimedLyrics, getActiveLineIndex } from '../lib/lrc';
 
@@ -23,6 +23,8 @@ export default function NowPlayingFull() {
   } = useSongPlayer();
 
   const lineRefs = useRef([]);
+  const scrollRef = useRef(null);
+  const [pastHero, setPastHero] = useState(false);
 
   const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
   const activeIndex = timedLines ? getActiveLineIndex(timedLines, currentTime) : -1;
@@ -35,6 +37,11 @@ export default function NowPlayingFull() {
       });
     }
   }, [activeIndex]);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    setPastHero(scrollRef.current.scrollTop > 320);
+  };
 
   if (!currentSong) return null;
 
@@ -52,11 +59,13 @@ export default function NowPlayingFull() {
         <button className="np-collapse" onClick={() => setExpanded(false)}>
           <i className="fas fa-chevron-down"></i>
         </button>
-        <div className="np-eyebrow">Now Playing</div>
+        <div className="np-eyebrow">
+          {pastHero ? `Now Playing: ${currentSong.title}` : ''}
+        </div>
         <div style={{ width: '32px' }}></div>
       </div>
 
-      <div className="np-scroll">
+      <div className="np-scroll" ref={scrollRef} onScroll={handleScroll}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div
             className="np-cover"
@@ -106,4 +115,4 @@ export default function NowPlayingFull() {
       </div>
     </div>
   );
-}
+      }
