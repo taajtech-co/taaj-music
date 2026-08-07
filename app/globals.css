@@ -629,3 +629,132 @@ audio {
   font-size: 14px;
   cursor: pointer;
 }
+/* ===== Full-screen Now Playing ===== */
+.now-playing-full {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: linear-gradient(180deg, var(--surface-2), var(--bg));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 24px 40px;
+  overflow-y: auto;
+}
+
+.np-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.np-collapse {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  width: 32px;
+}
+
+.np-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.np-cover {
+  width: min(80vw, 320px);
+  height: min(80vw, 320px);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: white;
+  margin-bottom: 30px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.np-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.np-artist {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-bottom: 30px;
+  font-family: var(--font-mono);
+}
+
+.np-progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.np-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.np-time-row {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 30px;
+}
+
+.np-play-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-bar {
+  cursor: pointer;
+}
+
+/* Lyrics editor on My Uploads */
+.lyrics-box {
+  margin-top: 10px;
+}
+
+.lyrics-box textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+  resize: vertical;
+  }
