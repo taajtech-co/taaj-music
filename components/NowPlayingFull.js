@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { useSongPlayer } from '../context/PlayerContext';
+import { parseTimedLyrics, getActiveLineIndex } from '../lib/lrc';
 
 function formatTime(seconds) {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -19,6 +21,27 @@ export default function NowPlayingFull() {
     duration,
     seekTo,
   } = useSongPlayer();
+
+  const [showMiniTop, setShowMiniTop] = useState(false);
+  const scrollRef = useRef(null);
+  const lineRefs = useRef([]);
+
+  const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
+  const activeIndex = timedLines ? getActiveLineIndex(timedLines, currentTime) : -1;
+
+  useEffect(() => {
+    if (activeIndex >= 0 && lineRefs.current[activeIndex]) {
+      lineRefs.current[activeIndex].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [activeIndex]);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    setShowMiniTop(scrollRef.current.scrollTop > 60);
+  };
 
   if (!currentSong) return null;
 
@@ -40,27 +63,72 @@ export default function NowPlayingFull() {
         <div style={{ width: '32px' }}></div>
       </div>
 
-      <div
-        className="np-cover"
-        style={currentSong.cover ? { background: `url(${currentSong.cover}) center/cover` } : {}}
-      >
-        {!currentSong.cover && <i className="fas fa-music"></i>}
-      </div>
+      <div className="np-scroll" ref={scrollRef} onScroll={handleScroll}>
+        {showMiniTop && (
+          <div className="np-mini-top">
+            <div
+              className="card-img"
+              style={currentSong.cover ? { background: `url(${currentSong.cover}) center/cover` } : {}}
+            >
+              {!currentSong.cover && <i className="fas fa-music"></i>}
+            </div>
+            <div className="np-mini-top-info">
+              <div className="np-mini-top-title">{currentSong.title}</div>
+              <div className="np-mini-top-artist">{currentSong.artist}</div>
+            </div>
+            <button onClick={togglePlay}>
+              <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+            </button>
+          </div>
+        )}
 
-      <div className="np-title">{currentSong.title}</div>
-      <div className="np-artist">{currentSong.artist}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div
+            className="np-cover"
+            style={currentSong.cover ? { background: `url(${currentSong.cover}) center/cover` } : {}}
+          >
+            {!currentSong.cover && <i className="fas fa-music"></i>}
+          </div>
 
-      <div className="np-progress-bar" onClick={handleSeek}>
-        <div className="np-progress-fill" style={{ width: `${pct}%` }}></div>
-      </div>
-      <div className="np-time-row">
-        <span>{formatTime(currentTime)}</span>
-        <span>{formatTime(duration)}</span>
-      </div>
+          <div className="np-title">{currentSong.title}</div>
+          <div className="np-artist">{currentSong.artist}</div>
 
-      <button className="np-play-btn" onClick={togglePlay}>
-        <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
-      </button>
+          <div className="np-progress-bar" onClick={handleSeek}>
+            <div className="np-progress-fill" style={{ width: `${pct}%` }}></div>
+          </div>
+          <div className="np-time-row">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+
+          <button className="np-play-btn" onClick={togglePlay}>
+            <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+          </button>
+        </div>
+
+        <div className="np-lyrics-section">
+          <div className="np-lyrics-heading">Lyrics</div>
+
+          {timedLines && timedLines.length > 0 ? (
+            <div>
+              {timedLines.map((line, i) => (
+                <div
+                  key={i}
+                  ref={(el) => (lineRefs.current[i] = el)}
+                  className={`np-lyrics-line ${i === activeIndex ? 'active' : ''}`}
+                  onClick={() => seekTo(line.time / duration)}
+                >
+                  {line.text}
+                </div>
+              ))}
+            </div>
+          ) : currentSong.lyrics ? (
+            <div className="np-lyrics-text">{currentSong.lyrics}</div>
+          ) : (
+            <div className="np-lyrics-empty">No lyrics added for this song yet.</div>
+          )}
+        </div>
+      </div>
     </div>
   );
-}
+            }
