@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function Navbar() {
@@ -14,19 +15,19 @@ export default function Navbar() {
 
   return (
     <header>
-      <a href="/" className="logo">
+      <Link href="/" className="logo">
         <span className="wave-mark">
           <span></span><span></span><span></span><span></span>
         </span>
         TAAJ MUSIC
-      </a>
+      </Link>
 
       {!session && (
         <div className="header-right">
-          <a href="/login" className="btn btn-outline">Log in</a>
-          <a href="/signup" className="btn btn-primary">Sign up</a>
+          <Link href="/login" className="btn btn-outline">Log in</Link>
+          <Link href="/signup" className="btn btn-primary">Sign up</Link>
         </div>
       )}
     </header>
   );
-}
+          }
