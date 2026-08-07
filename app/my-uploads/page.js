@@ -10,9 +10,6 @@ export default function MyUploadsPage() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [openLyricsId, setOpenLyricsId] = useState(null);
-  const [lyricsDraft, setLyricsDraft] = useState('');
-  const [savingLyrics, setSavingLyrics] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -30,7 +27,7 @@ export default function MyUploadsPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from('songs')
-      .select('id, title, artist, status, delete_requested, lyrics, created_at')
+      .select('id, title, artist, status, delete_requested, lyrics, timed_lyrics, created_at')
       .eq('uploader_id', userId)
       .order('created_at', { ascending: false });
 
@@ -44,27 +41,6 @@ export default function MyUploadsPage() {
       setMessage('Something went wrong: ' + error.message);
     } else {
       setMessage('Deletion requested. An admin will review it.');
-      loadSongs(session.user.id);
-    }
-  };
-
-  const openLyrics = (song) => {
-    setOpenLyricsId(song.id);
-    setLyricsDraft(song.lyrics || '');
-  };
-
-  const saveLyrics = async (songId) => {
-    setSavingLyrics(true);
-    const { error } = await supabase.rpc('update_song_lyrics', {
-      song_id: songId,
-      new_lyrics: lyricsDraft,
-    });
-    setSavingLyrics(false);
-    if (error) {
-      setMessage('Could not save lyrics: ' + error.message);
-    } else {
-      setMessage('Lyrics saved.');
-      setOpenLyricsId(null);
       loadSongs(session.user.id);
     }
   };
@@ -128,39 +104,17 @@ export default function MyUploadsPage() {
               )}
             </div>
 
-            {openLyricsId !== song.id ? (
-              <button
-                className="btn btn-outline"
-                onClick={() => openLyrics(song)}
-                style={{ marginTop: '14px', fontSize: '12px' }}
-              >
-                <i className="fas fa-align-left" style={{ marginRight: '6px' }}></i>
-                {song.lyrics ? 'Edit lyrics' : 'Add lyrics'}
-              </button>
-            ) : (
-              <div className="lyrics-box">
-                <textarea
-                  value={lyricsDraft}
-                  onChange={(e) => setLyricsDraft(e.target.value)}
-                  placeholder="Paste or type the lyrics here..."
-                />
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => saveLyrics(song.id)}
-                    disabled={savingLyrics}
-                  >
-                    {savingLyrics ? 'Saving...' : 'Save lyrics'}
-                  </button>
-                  <button className="btn btn-outline" onClick={() => setOpenLyricsId(null)}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+            <a
+              href={`/sync/${song.id}`}
+              className="btn btn-outline"
+              style={{ marginTop: '14px', fontSize: '12px', display: 'inline-block' }}
+            >
+              <i className="fas fa-wave-square" style={{ marginRight: '6px' }}></i>
+              {song.timed_lyrics ? 'Re-sync lyrics' : 'Sync lyrics'}
+            </a>
           </div>
         ))}
       </div>
     </>
   );
-    }
+                                    }
