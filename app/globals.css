@@ -906,3 +906,38 @@ audio {
   flex-direction: column;
   align-items: center;
   }
+/* ===== Keep the down-arrow bar fixed at top, always tappable ===== */
+.now-playing-full {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: linear-gradient(180deg, var(--surface-2), var(--bg));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.now-playing-full .np-topbar {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 20px 24px 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.now-playing-full .np-scroll {
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+    }
