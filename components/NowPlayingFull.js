@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSongPlayer } from '../context/PlayerContext';
 import { parseTimedLyrics, getActiveLineIndex } from '../lib/lrc';
 
@@ -22,8 +22,6 @@ export default function NowPlayingFull() {
     seekTo,
   } = useSongPlayer();
 
-  const [showMiniTop, setShowMiniTop] = useState(false);
-  const scrollRef = useRef(null);
   const lineRefs = useRef([]);
 
   const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
@@ -37,11 +35,6 @@ export default function NowPlayingFull() {
       });
     }
   }, [activeIndex]);
-
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
-    setShowMiniTop(scrollRef.current.scrollTop > 60);
-  };
 
   if (!currentSong) return null;
 
@@ -63,25 +56,7 @@ export default function NowPlayingFull() {
         <div style={{ width: '32px' }}></div>
       </div>
 
-      <div className="np-scroll" ref={scrollRef} onScroll={handleScroll}>
-        {showMiniTop && (
-          <div className="np-mini-top">
-            <div
-              className="card-img"
-              style={currentSong.cover ? { background: `url(${currentSong.cover}) center/cover` } : {}}
-            >
-              {!currentSong.cover && <i className="fas fa-music"></i>}
-            </div>
-            <div className="np-mini-top-info">
-              <div className="np-mini-top-title">{currentSong.title}</div>
-              <div className="np-mini-top-artist">{currentSong.artist}</div>
-            </div>
-            <button onClick={togglePlay}>
-              <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
-            </button>
-          </div>
-        )}
-
+      <div className="np-scroll">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div
             className="np-cover"
@@ -131,4 +106,4 @@ export default function NowPlayingFull() {
       </div>
     </div>
   );
-            }
+}
