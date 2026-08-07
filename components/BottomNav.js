@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function BottomNav() {
@@ -18,32 +19,32 @@ export default function BottomNav() {
 
   return (
     <nav className="bottom-nav">
-      <a href="/" className={isActive('/') ? 'active' : ''}>
+      <Link href="/" className={isActive('/') ? 'active' : ''}>
         <i className="fas fa-house"></i>
         Home
-      </a>
+      </Link>
 
       {session ? (
         <>
-          <a href="/upload" className={isActive('/upload') ? 'active' : ''}>
+          <Link href="/upload" className={isActive('/upload') ? 'active' : ''}>
             <i className="fas fa-circle-plus"></i>
             Upload
-          </a>
-          <a href="/my-uploads" className={isActive('/my-uploads') ? 'active' : ''}>
+          </Link>
+          <Link href="/my-uploads" className={isActive('/my-uploads') ? 'active' : ''}>
             <i className="fas fa-record-vinyl"></i>
             Library
-          </a>
-          <a href="/settings" className={isActive('/settings') ? 'active' : ''}>
+          </Link>
+          <Link href="/settings" className={isActive('/settings') ? 'active' : ''}>
             <i className="fas fa-gear"></i>
             Settings
-          </a>
+          </Link>
         </>
       ) : (
-        <a href="/login" className={isActive('/login') ? 'active' : ''}>
+        <Link href="/login" className={isActive('/login') ? 'active' : ''}>
           <i className="fas fa-user"></i>
           Log in
-        </a>
+        </Link>
       )}
     </nav>
   );
-            }
+    }
