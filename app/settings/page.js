@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function SettingsPage() {
@@ -51,7 +52,7 @@ export default function SettingsPage() {
   return (
     <>
       <div className="settings-topbar">
-        <a href="/" className="settings-back"><i className="fas fa-arrow-left"></i></a>
+        <Link href="/" className="settings-back"><i className="fas fa-arrow-left"></i></Link>
         <div className="settings-topbar-title">Settings</div>
         <div style={{ width: '32px' }}></div>
       </div>
@@ -75,30 +76,30 @@ export default function SettingsPage() {
           </div>
         </button>
 
-        <a href="/upload" className="settings-row">
+        <Link href="/upload" className="settings-row">
           <div className="settings-row-icon"><i className="fas fa-circle-plus"></i></div>
           <div>
             <div className="settings-row-title">Upload a song</div>
             <div className="settings-row-sub">Submit a track for review</div>
           </div>
-        </a>
+        </Link>
 
-        <a href="/my-uploads" className="settings-row">
+        <Link href="/my-uploads" className="settings-row">
           <div className="settings-row-icon"><i className="fas fa-record-vinyl"></i></div>
           <div>
             <div className="settings-row-title">My Uploads</div>
-            <div className="settings-row-sub">Status &amp; deletion requests</div>
+            <div className="settings-row-sub">Status &amp; deletion requests, lyrics</div>
           </div>
-        </a>
+        </Link>
 
         {isAdmin && (
-          <a href="/admin" className="settings-row">
+          <Link href="/admin" className="settings-row">
             <div className="settings-row-icon"><i className="fas fa-shield-halved"></i></div>
             <div>
               <div className="settings-row-title">Admin review</div>
               <div className="settings-row-sub">Approve uploads &amp; deletions</div>
             </div>
-          </a>
+          </Link>
         )}
 
         <div className="settings-row" style={{ cursor: 'default' }}>
@@ -115,4 +116,4 @@ export default function SettingsPage() {
       </div>
     </>
   );
-    }
+  }
