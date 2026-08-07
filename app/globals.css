@@ -758,3 +758,95 @@ audio {
   font-family: var(--font-body);
   resize: vertical;
   }
+/* ===== Synced lyrics in full player ===== */
+.np-lyrics-line {
+  padding: 8px 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.np-lyrics-line.active {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 19px;
+  transform: scale(1.02);
+}
+
+/* ===== Sync tool ===== */
+.sync-wrap {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px 20px 140px;
+}
+
+.sync-textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--font-body);
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.sync-stage {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.sync-progress {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.sync-current-line {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-next-line {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.sync-mark-btn {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.sync-controls-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sync-time {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  }
