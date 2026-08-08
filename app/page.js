@@ -9,7 +9,7 @@ export default function HomePage() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
-  const { setCurrentSong } = useSongPlayer();
+  const { playQueue } = useSongPlayer();
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -30,23 +30,15 @@ export default function HomePage() {
     return supabase.storage.from('covers').getPublicUrl(song.cover_path).data.publicUrl;
   };
 
-  const playSong = (song) => {
-    const { data } = supabase.storage.from('songs').getPublicUrl(song.storage_path);
-    setCurrentSong({
-      title: song.title,
-      artist: song.artist,
-      url: data.publicUrl,
-      cover: coverUrl(song),
-      lyrics: song.lyrics,
-      timedLyrics: song.timed_lyrics,
-    });
-  };
-
   const filteredSongs = songs.filter((song) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
   });
+
+  const playSongAt = (index) => {
+    playQueue(filteredSongs, index);
+  };
 
   return (
     <>
@@ -89,8 +81,8 @@ export default function HomePage() {
         )}
 
         <div className="cards-grid">
-          {filteredSongs.map((song) => (
-            <div className="card" key={song.id} onClick={() => playSong(song)}>
+          {filteredSongs.map((song, index) => (
+            <div className="card" key={song.id} onClick={() => playSongAt(index)}>
               <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
                 {!coverUrl(song) && <i className="fas fa-music"></i>}
               </div>
@@ -102,4 +94,4 @@ export default function HomePage() {
       </div>
     </>
   );
-    }
+  }
