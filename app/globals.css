@@ -1024,3 +1024,27 @@ audio {
   cursor: pointer;
   font-size: 13px;
 }
+/* ===== Lyrics as its own fixed-header panel, separate from hero scroll ===== */
+.np-lyrics-full {
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.np-lyrics-header-row-fixed {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 24px 16px;
+}
+
+.np-lyrics-scroll {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 24px 60px;
+  }
