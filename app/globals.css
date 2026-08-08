@@ -1057,3 +1057,13 @@ audio {
 .card:focus {
   outline: none;
   }
+/* ===== Force a consistent 2-column minimum on narrow phones ===== */
+.cards-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+@media (max-width: 400px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  }
