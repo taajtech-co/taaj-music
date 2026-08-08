@@ -46,6 +46,7 @@ export default function NowPlayingFull() {
   const [likeCount, setLikeCount] = useState(0);
   const [userId, setUserId] = useState(null);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [likeAnimating, setLikeAnimating] = useState(false);
 
   const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
   const activeIndex = timedLines ? getActiveLineIndex(timedLines, currentTime) : -1;
@@ -105,6 +106,12 @@ export default function NowPlayingFull() {
     const next = !liked;
     setLiked(next);
     setLikeCount((c) => (next ? c + 1 : Math.max(c - 1, 0)));
+
+    if (next) {
+      setLikeAnimating(true);
+      setTimeout(() => setLikeAnimating(false), 500);
+    }
+
     await supabase
       .from('song_interactions')
       .upsert({ user_id: userId, song_id: currentSong.id, liked: next }, { onConflict: 'user_id,song_id' });
@@ -157,8 +164,8 @@ export default function NowPlayingFull() {
             <div className="np-artist">{currentSong.artist}</div>
 
             <div className="np-action-row">
-              <button className={`np-pill ${liked ? 'active' : ''}`} onClick={toggleLiked}>
-                <i className={liked ? 'fas fa-heart' : 'far fa-heart'}></i>
+              <button className={`np-pill ${liked ? 'active' : ''} ${likeAnimating ? 'burst-ring' : ''}`} onClick={toggleLiked}>
+                <i className={`${liked ? 'fas fa-heart' : 'far fa-heart'} ${likeAnimating ? 'like-pop' : ''}`}></i>
                 Like
                 {likeCount > 0 && <span className="like-count">{formatCount(likeCount)}</span>}
               </button>
@@ -217,25 +224,4 @@ export default function NowPlayingFull() {
           <div className="np-lyrics-scroll" ref={lyricsScrollRef}>
             {timedLines && timedLines.length > 0 ? (
               <div>
-                {timedLines.map((line, i) => (
-                  <div
-                    key={i}
-                    ref={(el) => (lineRefs.current[i] = el)}
-                    className={`np-lyrics-line ${i === activeIndex ? 'active' : ''}`}
-                    onClick={() => seekTo(line.time / duration)}
-                  >
-                    {line.text}
-                  </div>
-                ))}
-              </div>
-            ) : currentSong.lyrics ? (
-              <div className="np-lyrics-text">{currentSong.lyrics}</div>
-            ) : (
-              <div className="np-lyrics-empty">No lyrics added for this song yet.</div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-      }
+                {timedLines.map
