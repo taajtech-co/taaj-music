@@ -45,6 +45,7 @@ export default function NowPlayingFull() {
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [userId, setUserId] = useState(null);
+  const [showLyrics, setShowLyrics] = useState(false);
 
   const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
   const activeIndex = timedLines ? getActiveLineIndex(timedLines, currentTime) : -1;
@@ -82,21 +83,30 @@ export default function NowPlayingFull() {
 
   useEffect(() => {
     loadInteraction();
+    setShowLyrics(false);
   }, [userId, currentSong?.id]);
 
   useEffect(() => {
-    if (activeIndex >= 0 && lineRefs.current[activeIndex]) {
+    if (showLyrics && activeIndex >= 0 && lineRefs.current[activeIndex]) {
       lineRefs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [activeIndex]);
+  }, [activeIndex, showLyrics]);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
     setPastHero(scrollRef.current.scrollTop > 320);
   };
 
-  const jumpToLyrics = () => {
-    lyricsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const openLyrics = () => {
+    setShowLyrics(true);
+    setTimeout(() => {
+      lyricsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  const closeLyrics = () => {
+    setShowLyrics(false);
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleLiked = async () => {
@@ -156,7 +166,7 @@ export default function NowPlayingFull() {
               Like
               {likeCount > 0 && <span className="like-count">{formatCount(likeCount)}</span>}
             </button>
-            <button className="np-pill" onClick={jumpToLyrics}>
+            <button className={`np-pill ${showLyrics ? 'active' : ''}`} onClick={openLyrics}>
               <i className="fas fa-quote-right"></i> Lyrics
             </button>
             <button className={`np-pill ${saved ? 'active' : ''}`} onClick={toggleSaved}>
@@ -197,29 +207,36 @@ export default function NowPlayingFull() {
           </div>
         </div>
 
-        <div className="np-lyrics-section" ref={lyricsSectionRef}>
-          <div className="np-lyrics-heading">Lyrics</div>
-
-          {timedLines && timedLines.length > 0 ? (
-            <div>
-              {timedLines.map((line, i) => (
-                <div
-                  key={i}
-                  ref={(el) => (lineRefs.current[i] = el)}
-                  className={`np-lyrics-line ${i === activeIndex ? 'active' : ''}`}
-                  onClick={() => seekTo(line.time / duration)}
-                >
-                  {line.text}
-                </div>
-              ))}
+        {showLyrics && (
+          <div className="np-lyrics-section" ref={lyricsSectionRef}>
+            <div className="np-lyrics-header-row">
+              <div className="np-lyrics-heading">Lyrics</div>
+              <button className="np-lyrics-close" onClick={closeLyrics}>
+                <i className="fas fa-xmark"></i>
+              </button>
             </div>
-          ) : currentSong.lyrics ? (
-            <div className="np-lyrics-text">{currentSong.lyrics}</div>
-          ) : (
-            <div className="np-lyrics-empty">No lyrics added for this song yet.</div>
-          )}
-        </div>
+
+            {timedLines && timedLines.length > 0 ? (
+              <div>
+                {timedLines.map((line, i) => (
+                  <div
+                    key={i}
+                    ref={(el) => (lineRefs.current[i] = el)}
+                    className={`np-lyrics-line ${i === activeIndex ? 'active' : ''}`}
+                    onClick={() => seekTo(line.time / duration)}
+                  >
+                    {line.text}
+                  </div>
+                ))}
+              </div>
+            ) : currentSong.lyrics ? (
+              <div className="np-lyrics-text">{currentSong.lyrics}</div>
+            ) : (
+              <div className="np-lyrics-empty">No lyrics added for this song yet.</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
-           }
+    }
