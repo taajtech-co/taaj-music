@@ -30,7 +30,7 @@ export default function BottomNav() {
             <i className="fas fa-circle-plus"></i>
             Upload
           </Link>
-          <Link href="/my-uploads" className={isActive('/my-uploads') ? 'active' : ''}>
+          <Link href="/library" className={isActive('/library') ? 'active' : ''}>
             <i className="fas fa-record-vinyl"></i>
             Library
           </Link>
