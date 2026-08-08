@@ -2,6 +2,7 @@ import './globals.css';
 import { PlayerProvider } from '../context/PlayerContext';
 import BottomNav from '../components/BottomNav';
 import LoadingSplash from '../components/LoadingSplash';
+import PageTransition from '../components/PageTransition';
 
 export const metadata = {
   title: 'Taaj Music',
@@ -32,9 +33,11 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <LoadingSplash />
-        <PlayerProvider>{children}</PlayerProvider>
+        <PlayerProvider>
+          <PageTransition>{children}</PageTransition>
+        </PlayerProvider>
         <BottomNav />
       </body>
     </html>
   );
-            }
+    }
