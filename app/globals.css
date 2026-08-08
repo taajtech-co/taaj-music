@@ -1048,3 +1048,12 @@ audio {
   -webkit-overflow-scrolling: touch;
   padding: 0 24px 60px;
   }
+/* ===== Remove inconsistent browser tap/focus outlines on cards ===== */
+.card {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.card:focus {
+  outline: none;
+  }
