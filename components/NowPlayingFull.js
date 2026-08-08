@@ -12,6 +12,12 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function formatCount(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
+
 export default function NowPlayingFull() {
   const {
     currentSong,
@@ -37,6 +43,7 @@ export default function NowPlayingFull() {
   const [pastHero, setPastHero] = useState(false);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [userId, setUserId] = useState(null);
 
   const timedLines = currentSong ? parseTimedLyrics(currentSong.timedLyrics) : null;
@@ -48,22 +55,33 @@ export default function NowPlayingFull() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!userId || !currentSong?.id) {
+  const loadInteraction = async () => {
+    if (!currentSong?.id) return;
+
+    const { data: songData } = await supabase
+      .from('songs')
+      .select('like_count')
+      .eq('id', currentSong.id)
+      .single();
+    setLikeCount(songData?.like_count || 0);
+
+    if (!userId) {
       setLiked(false);
       setSaved(false);
       return;
     }
-    supabase
+    const { data } = await supabase
       .from('song_interactions')
       .select('liked, saved')
       .eq('user_id', userId)
       .eq('song_id', currentSong.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setLiked(data?.liked || false);
-        setSaved(data?.saved || false);
-      });
+      .maybeSingle();
+    setLiked(data?.liked || false);
+    setSaved(data?.saved || false);
+  };
+
+  useEffect(() => {
+    loadInteraction();
   }, [userId, currentSong?.id]);
 
   useEffect(() => {
@@ -85,6 +103,7 @@ export default function NowPlayingFull() {
     if (!userId || !currentSong?.id) return;
     const next = !liked;
     setLiked(next);
+    setLikeCount((c) => (next ? c + 1 : Math.max(c - 1, 0)));
     await supabase
       .from('song_interactions')
       .upsert({ user_id: userId, song_id: currentSong.id, liked: next }, { onConflict: 'user_id,song_id' });
@@ -133,7 +152,9 @@ export default function NowPlayingFull() {
 
           <div className="np-action-row">
             <button className={`np-pill ${liked ? 'active' : ''}`} onClick={toggleLiked}>
-              <i className={liked ? 'fas fa-heart' : 'far fa-heart'}></i> Like
+              <i className={liked ? 'fas fa-heart' : 'far fa-heart'}></i>
+              Like
+              {likeCount > 0 && <span className="like-count">{formatCount(likeCount)}</span>}
             </button>
             <button className="np-pill" onClick={jumpToLyrics}>
               <i className="fas fa-quote-right"></i> Lyrics
@@ -201,4 +222,4 @@ export default function NowPlayingFull() {
       </div>
     </div>
   );
-    }
+           }
