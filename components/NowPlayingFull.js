@@ -86,7 +86,6 @@ export default function NowPlayingFull() {
     setShowLyrics(false);
   }, [userId, currentSong?.id]);
 
-  // Auto-scroll ONLY inside the lyrics panel, never the whole screen.
   useEffect(() => {
     if (showLyrics && activeIndex >= 0 && lineRefs.current[activeIndex] && lyricsScrollRef.current) {
       lineRefs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -137,7 +136,9 @@ export default function NowPlayingFull() {
           <i className="fas fa-chevron-down"></i>
         </button>
         <div className="np-eyebrow">
-          {!showLyrics && pastHero ? `Now Playing: ${currentSong.title}` : ''}
+          {showLyrics
+            ? `Now Playing: ${currentSong.title}`
+            : (pastHero ? `Now Playing: ${currentSong.title}` : '')}
         </div>
         <div style={{ width: '32px' }}></div>
       </div>
@@ -237,4 +238,4 @@ export default function NowPlayingFull() {
       )}
     </div>
   );
-                                                      }
+      }
