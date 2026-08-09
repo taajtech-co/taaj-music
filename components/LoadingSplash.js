@@ -14,7 +14,7 @@ export default function LoadingSplash() {
     <div className={`loading-splash-v2 ${hide ? 'hide' : ''}`}>
       <div className="loading-glow-v2"></div>
       <div className="loading-stack-v2">
-        <img src="/logo_top.png" alt="Taaj" />
+        <img src="/taaj_full_logo.png" alt="Taaj Music" />
         <div className="loading-bars-v2">
           <div className="lbar"></div>
           <div className="lbar"></div>
@@ -22,8 +22,7 @@ export default function LoadingSplash() {
           <div className="lbar"></div>
           <div className="lbar"></div>
         </div>
-        <img src="/logo_bottom.png" alt="Taaj Music" />
       </div>
     </div>
   );
-}
+  }
