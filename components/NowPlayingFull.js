@@ -224,4 +224,25 @@ export default function NowPlayingFull() {
           <div className="np-lyrics-scroll" ref={lyricsScrollRef}>
             {timedLines && timedLines.length > 0 ? (
               <div>
-                {timedLines.map
+                {timedLines.map((line, i) => (
+                  <div
+                    key={i}
+                    ref={(el) => (lineRefs.current[i] = el)}
+                    className={`np-lyrics-line ${i === activeIndex ? 'active' : ''}`}
+                    onClick={() => seekTo(line.time / duration)}
+                  >
+                    {line.text}
+                  </div>
+                ))}
+              </div>
+            ) : currentSong.lyrics ? (
+              <div className="np-lyrics-text">{currentSong.lyrics}</div>
+            ) : (
+              <div className="np-lyrics-empty">No lyrics added for this song yet.</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+      }
