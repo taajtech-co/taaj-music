@@ -15,7 +15,7 @@ export default function HomePage() {
     const loadSongs = async () => {
       const { data, error } = await supabase
         .from('songs')
-        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at')
+        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username)')
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
@@ -94,4 +94,4 @@ export default function HomePage() {
       </div>
     </>
   );
-  }
+    }
