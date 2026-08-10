@@ -35,12 +35,13 @@ export default function BottomNav() {
         Home
       </a>
 
+      <a href="/search" onClick={go('/search')} className={isActive('/search') ? 'active' : ''}>
+        <i className="fas fa-magnifying-glass"></i>
+        Search
+      </a>
+
       {session ? (
         <>
-          <a href="/upload" onClick={go('/upload')} className={isActive('/upload') ? 'active' : ''}>
-            <i className="fas fa-circle-plus"></i>
-            Upload
-          </a>
           <a href="/library" onClick={go('/library')} className={isActive('/library') ? 'active' : ''}>
             <i className="fas fa-record-vinyl"></i>
             Library
