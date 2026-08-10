@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSongPlayer } from '../context/PlayerContext';
 import { supabase } from '../lib/supabaseClient';
 import { parseTimedLyrics, getActiveLineIndex } from '../lib/lrc';
@@ -163,6 +164,22 @@ export default function NowPlayingFull() {
             <div className="np-title">{currentSong.title}</div>
             <div className="np-artist">{currentSong.artist}</div>
 
+            {currentSong.uploaderUsername && (
+              <Link
+                href={`/profile/${currentSong.uploaderUsername}`}
+                onClick={() => setExpanded(false)}
+                style={{
+                  color: 'var(--text-muted)',
+                  fontSize: '12px',
+                  fontFamily: 'var(--font-mono)',
+                  marginTop: '4px',
+                  textDecoration: 'underline',
+                }}
+              >
+                Uploaded by @{currentSong.uploaderUsername}
+              </Link>
+            )}
+
             <div className="np-action-row">
               <button className={`np-pill ${liked ? 'active' : ''} ${likeAnimating ? 'burst-ring' : ''}`} onClick={toggleLiked}>
                 <i className={`${liked ? 'fas fa-heart' : 'far fa-heart'} ${likeAnimating ? 'like-pop' : ''}`}></i>
@@ -245,4 +262,4 @@ export default function NowPlayingFull() {
       )}
     </div>
   );
-      }
+}
