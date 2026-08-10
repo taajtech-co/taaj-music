@@ -26,7 +26,7 @@ export default function LibraryPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from('song_interactions')
-      .select('song_id, songs(id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, status)')
+      .select('song_id, songs(id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, status, profiles(username))')
       .eq('user_id', userId)
       .eq('saved', true);
 
@@ -78,4 +78,4 @@ export default function LibraryPage() {
       </div>
     </>
   );
-}
+        }
