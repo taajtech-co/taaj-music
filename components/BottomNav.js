@@ -1,49 +1,60 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabaseClient';
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [session, setSession] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setReady(true);
+    });
     const { data: listener } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => listener.subscription.unsubscribe();
   }, []);
 
   const isActive = (path) => pathname === path;
 
+  const go = (path) => (e) => {
+    e.preventDefault();
+    router.push(path);
+  };
+
+  if (!ready) return null;
+
   return (
     <nav className="bottom-nav">
-      <Link href="/" className={isActive('/') ? 'active' : ''}>
+      <a href="/" onClick={go('/')} className={isActive('/') ? 'active' : ''}>
         <i className="fas fa-house"></i>
         Home
-      </Link>
+      </a>
 
       {session ? (
         <>
-          <Link href="/upload" className={isActive('/upload') ? 'active' : ''}>
+          <a href="/upload" onClick={go('/upload')} className={isActive('/upload') ? 'active' : ''}>
             <i className="fas fa-circle-plus"></i>
             Upload
-          </Link>
-          <Link href="/library" className={isActive('/library') ? 'active' : ''}>
+          </a>
+          <a href="/library" onClick={go('/library')} className={isActive('/library') ? 'active' : ''}>
             <i className="fas fa-record-vinyl"></i>
             Library
-          </Link>
-          <Link href="/settings" className={isActive('/settings') ? 'active' : ''}>
+          </a>
+          <a href="/settings" onClick={go('/settings')} className={isActive('/settings') ? 'active' : ''}>
             <i className="fas fa-gear"></i>
             Settings
-          </Link>
+          </a>
         </>
       ) : (
-        <Link href="/login" className={isActive('/login') ? 'active' : ''}>
+        <a href="/login" onClick={go('/login')} className={isActive('/login') ? 'active' : ''}>
           <i className="fas fa-user"></i>
           Log in
-        </Link>
+        </a>
       )}
     </nav>
   );
