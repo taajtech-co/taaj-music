@@ -58,13 +58,13 @@ export default function SettingsPage() {
       </div>
 
       <div className="settings-list">
-        <div className="settings-row" style={{ cursor: 'default' }}>
+        <Link href={`/profile/${username}`} className="settings-row">
           <div className="settings-row-icon"><i className="fas fa-user"></i></div>
           <div>
             <div className="settings-row-title">@{username}</div>
-            <div className="settings-row-sub">{email}</div>
+            <div className="settings-row-sub">{email} · View profile</div>
           </div>
-        </div>
+        </Link>
 
         <button className="settings-row" onClick={toggleTheme}>
           <div className="settings-row-icon">
@@ -116,4 +116,4 @@ export default function SettingsPage() {
       </div>
     </>
   );
-  }
+              }
