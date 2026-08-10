@@ -15,7 +15,7 @@ export function PlayerProvider({ children }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [shuffle, setShuffle] = useState(false);
-  const [repeatMode, setRepeatMode] = useState('off'); // off | all | one
+  const [repeatMode, setRepeatMode] = useState('off');
   const audioRef = useRef(null);
 
   const rawSong = currentIndex >= 0 ? queue[currentIndex] : null;
@@ -34,6 +34,7 @@ export function PlayerProvider({ children }) {
       cover: coverUrl,
       lyrics: rawSong.lyrics,
       timedLyrics: rawSong.timed_lyrics,
+      uploaderUsername: rawSong.profiles?.username || null,
     };
   }, [rawSong]);
 
@@ -165,4 +166,4 @@ export function useSongPlayer() {
   const ctx = useContext(PlayerContext);
   if (!ctx) throw new Error('useSongPlayer must be used within PlayerProvider');
   return ctx;
-    }
+        }
