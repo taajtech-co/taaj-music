@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState('dark');
 
@@ -23,12 +24,13 @@ export default function SettingsPage() {
       setEmail(data.session.user.email);
       supabase
         .from('profiles')
-        .select('username, is_admin')
+        .select('username, display_name, is_admin')
         .eq('id', data.session.user.id)
         .single()
         .then(({ data: profile }) => {
           if (profile) {
             setUsername(profile.username);
+            setDisplayName(profile.display_name);
             setIsAdmin(profile.is_admin);
           }
         });
@@ -61,8 +63,8 @@ export default function SettingsPage() {
         <Link href={`/profile/${username}`} className="settings-row">
           <div className="settings-row-icon"><i className="fas fa-user"></i></div>
           <div>
-            <div className="settings-row-title">@{username}</div>
-            <div className="settings-row-sub">{email} · View profile</div>
+            <div className="settings-row-title">Account</div>
+            <div className="settings-row-sub">{displayName || `@${username}`} · {email}</div>
           </div>
         </Link>
 
@@ -116,4 +118,4 @@ export default function SettingsPage() {
       </div>
     </>
   );
-              }
+                       }
