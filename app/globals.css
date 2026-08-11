@@ -1239,3 +1239,7 @@ a, button, .settings-row, .bottom-nav a {
 a:focus, button:focus {
   outline: none;
                                      }
+/* ===== Universal fix: no blue tap highlight anywhere in the app ===== */
+* {
+  -webkit-tap-highlight-color: transparent;
+    }
