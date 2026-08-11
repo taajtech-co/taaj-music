@@ -26,6 +26,9 @@ export function PlayerProvider({ children }) {
     const coverUrl = rawSong.cover_path
       ? supabase.storage.from('covers').getPublicUrl(rawSong.cover_path).data.publicUrl
       : null;
+    const uploaderAvatarUrl = rawSong.profiles?.avatar_path
+      ? supabase.storage.from('avatars').getPublicUrl(rawSong.profiles.avatar_path).data.publicUrl
+      : null;
     return {
       id: rawSong.id,
       title: rawSong.title,
@@ -35,6 +38,7 @@ export function PlayerProvider({ children }) {
       lyrics: rawSong.lyrics,
       timedLyrics: rawSong.timed_lyrics,
       uploaderUsername: rawSong.profiles?.username || null,
+      uploaderAvatarUrl,
     };
   }, [rawSong]);
 
@@ -166,4 +170,4 @@ export function useSongPlayer() {
   const ctx = useContext(PlayerContext);
   if (!ctx) throw new Error('useSongPlayer must be used within PlayerProvider');
   return ctx;
-        }
+}
