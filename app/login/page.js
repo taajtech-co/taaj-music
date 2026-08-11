@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState(''); // username OR email
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -85,10 +85,13 @@ export default function LoginPage() {
             {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
+        <div className="auth-switch" style={{ marginTop: '10px' }}>
+          <a href="/forgot-password">Forgot password?</a>
+        </div>
         <div className="auth-switch">
           Don&apos;t have an account? <a href="/signup">Sign up</a>
         </div>
       </div>
     </div>
   );
-        }
+  }
