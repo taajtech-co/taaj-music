@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -22,6 +23,8 @@ export default function SignupPage() {
       return;
     }
 
+    // Best-effort check so people get quick feedback, though the real
+    // guarantee happens at confirmation time via the database.
     const { data: existing } = await supabase
       .from('profiles')
       .select('id')
@@ -34,9 +37,12 @@ export default function SignupPage() {
       return;
     }
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { username: cleanUsername },
+      },
     });
 
     if (signUpError) {
@@ -45,19 +51,26 @@ export default function SignupPage() {
       return;
     }
 
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      username: cleanUsername,
-    });
-
-    if (profileError) {
-      setError(profileError.message);
-      setLoading(false);
-      return;
-    }
-
-    window.location.href = '/';
+    setLoading(false);
+    setConfirmSent(true);
   };
+
+  if (confirmSent) {
+    return (
+      <div className="auth-wrapper">
+        <div className="auth-card">
+          <h1>Check your email</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', textAlign: 'center', marginTop: '10px' }}>
+            We sent a confirmation link to <strong style={{ color: 'var(--text)' }}>{email}</strong>.
+            Click it to activate your account, then come back and log in.
+          </p>
+          <div className="auth-switch">
+            <a href="/login">Go to login</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-wrapper">
@@ -104,4 +117,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-        }
+      }
