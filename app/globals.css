@@ -1230,3 +1230,12 @@ audio {
   0%, 100% { transform: scaleY(0.45); }
   50% { transform: scaleY(1); }
   }
+/* ===== Remove blue tap-highlight box on all interactive elements ===== */
+a, button, .settings-row, .bottom-nav a {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+a:focus, button:focus {
+  outline: none;
+                                     }
