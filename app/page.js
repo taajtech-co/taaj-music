@@ -1,36 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Navbar from '../components/Navbar';
 import { useSongPlayer } from '../context/PlayerContext';
+import { useCachedQuery } from '../lib/useCachedQuery';
+
+async function fetchApprovedSongs() {
+  const { data, error } = await supabase
+    .from('songs')
+    .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
 
 export default function HomePage() {
-  const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const { playQueue } = useSongPlayer();
-
-  useEffect(() => {
-    const loadSongs = async () => {
-      const { data, error } = await supabase
-        .from('songs')
-        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
-
-      if (!error) setSongs(data);
-      setLoading(false);
-    };
-    loadSongs();
-  }, []);
+  const { data: songs, loading } = useCachedQuery('songs:approved', fetchApprovedSongs);
 
   const coverUrl = (song) => {
     if (!song.cover_path) return null;
     return supabase.storage.from('covers').getPublicUrl(song.cover_path).data.publicUrl;
   };
 
-  const filteredSongs = songs.filter((song) => {
+  const allSongs = songs || [];
+
+  const filteredSongs = allSongs.filter((song) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
@@ -94,4 +92,4 @@ export default function HomePage() {
       </div>
     </>
   );
-                                             }
+      }
