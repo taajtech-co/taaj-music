@@ -4,18 +4,17 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabaseClient';
 import { useSongPlayer } from '../../../context/PlayerContext';
+import { useCachedQuery } from '../../../lib/useCachedQuery';
+import { useDataCache } from '../../../context/DataCacheContext';
 
 export default function ProfilePage() {
   const { username } = useParams();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [followerCount, setFollowerCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [songs, setSongs] = useState([]);
   const { playQueue } = useSongPlayer();
+  const { clearCached } = useDataCache();
+
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [displayNameDraft, setDisplayNameDraft] = useState('');
@@ -23,34 +22,24 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    load();
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUserId(data.session?.user.id || null);
+      setSessionChecked(true);
+    });
   }, [username]);
 
-  const load = async () => {
-    setLoading(true);
+  const fetchProfileBundle = async () => {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_path')
+      .eq('username', username)
+      .maybeSingle();
 
-    // Get session and the profile itself first - everything else depends on the profile's id
-    const [{ data: sessionData }, { data: profileData }] = await Promise.all([
-      supabase.auth.getSession(),
-      supabase
-        .from('profiles')
-        .select('id, username, display_name, avatar_path')
-        .eq('username', username)
-        .maybeSingle(),
-    ]);
+    if (!profileData) return { profile: null };
 
+    const { data: sessionData } = await supabase.auth.getSession();
     const myId = sessionData.session?.user.id || null;
-    setCurrentUserId(myId);
 
-    if (!profileData) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-    setProfile(profileData);
-    setDisplayNameDraft(profileData.display_name || '');
-
-    // Now fire off everything else in parallel instead of one-by-one
     const [followersRes, followingRes, followRowRes, songsRes] = await Promise.all([
       supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profileData.id),
       supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profileData.id),
@@ -65,13 +54,23 @@ export default function ProfilePage() {
         .order('created_at', { ascending: false }),
     ]);
 
-    setFollowerCount(followersRes.count || 0);
-    setFollowingCount(followingRes.count || 0);
-    setIsFollowing(!!followRowRes.data);
-    setSongs(songsRes.data || []);
-
-    setLoading(false);
+    return {
+      profile: profileData,
+      followerCount: followersRes.count || 0,
+      followingCount: followingRes.count || 0,
+      isFollowing: !!followRowRes.data,
+      songs: songsRes.data || [],
+    };
   };
+
+  const cacheKey = `profile:${username}`;
+  const { data: bundle, loading, refresh } = useCachedQuery(cacheKey, fetchProfileBundle);
+
+  useEffect(() => {
+    if (bundle?.profile) {
+      setDisplayNameDraft(bundle.profile.display_name || '');
+    }
+  }, [bundle]);
 
   const avatarUrl = (p) => {
     if (!p?.avatar_path) return null;
@@ -79,29 +78,29 @@ export default function ProfilePage() {
   };
 
   const toggleFollow = async () => {
-    if (!currentUserId || !profile) return;
+    if (!currentUserId || !bundle?.profile) return;
+    const profile = bundle.profile;
+    const nowFollowing = !bundle.isFollowing;
 
-    if (isFollowing) {
-      setIsFollowing(false);
-      setFollowerCount((c) => Math.max(c - 1, 0));
+    if (nowFollowing) {
+      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: profile.id });
+    } else {
       await supabase
         .from('follows')
         .delete()
         .eq('follower_id', currentUserId)
         .eq('following_id', profile.id);
-    } else {
-      setIsFollowing(true);
-      setFollowerCount((c) => c + 1);
-      await supabase
-        .from('follows')
-        .insert({ follower_id: currentUserId, following_id: profile.id });
     }
+
+    clearCached(cacheKey);
+    refresh();
   };
 
   const saveProfileEdits = async () => {
+    if (!bundle?.profile) return;
     setSaving(true);
 
-    let avatarPath = profile.avatar_path;
+    let avatarPath = bundle.profile.avatar_path;
     if (avatarFile) {
       const ext = avatarFile.name.split('.').pop();
       const newPath = `${currentUserId}/${Date.now()}.${ext}`;
@@ -114,10 +113,14 @@ export default function ProfilePage() {
       .update({ display_name: displayNameDraft.trim() || null, avatar_path: avatarPath })
       .eq('id', currentUserId);
 
+    // This profile's own cache, plus the shared user list (used by Search), are now stale.
+    clearCached(cacheKey);
+    clearCached('users:all');
+
     setSaving(false);
     setEditing(false);
     setAvatarFile(null);
-    load();
+    refresh();
   };
 
   const coverUrl = (song) => {
@@ -126,10 +129,10 @@ export default function ProfilePage() {
   };
 
   const playSongAt = (index) => {
-    playQueue(songs, index);
+    playQueue(bundle.songs, index);
   };
 
-  if (loading) {
+  if (loading || !sessionChecked) {
     return (
       <div className="content-area" style={{ paddingTop: '30px' }}>
         <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
@@ -137,7 +140,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!profile) {
+  if (!bundle?.profile) {
     return (
       <>
         <div className="settings-topbar">
@@ -152,6 +155,7 @@ export default function ProfilePage() {
     );
   }
 
+  const { profile, followerCount, followingCount, isFollowing, songs } = bundle;
   const isOwnProfile = currentUserId === profile.id;
   const displayLabel = profile.display_name || `@${profile.username}`;
 
@@ -287,4 +291,4 @@ export default function ProfilePage() {
       </div>
     </>
   );
-}
+        }
