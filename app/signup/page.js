@@ -63,6 +63,9 @@ export default function SignupPage() {
             We sent a confirmation link to <strong style={{ color: 'var(--text)' }}>{email}</strong>.
             Click it to activate your account, then come back and log in.
           </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', marginTop: '14px' }}>
+            Don&apos;t see it? Check your spam or junk folder — it can sometimes land there.
+          </p>
           <div className="auth-switch">
             <a href="/login">Go to login</a>
           </div>
@@ -116,4 +119,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-      }
+           }
