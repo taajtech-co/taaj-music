@@ -29,15 +29,18 @@ export default function ProfilePage() {
   const load = async () => {
     setLoading(true);
 
-    const { data: sessionData } = await supabase.auth.getSession();
+    // Get session and the profile itself first - everything else depends on the profile's id
+    const [{ data: sessionData }, { data: profileData }] = await Promise.all([
+      supabase.auth.getSession(),
+      supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_path')
+        .eq('username', username)
+        .maybeSingle(),
+    ]);
+
     const myId = sessionData.session?.user.id || null;
     setCurrentUserId(myId);
-
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('id, username, display_name, avatar_path')
-      .eq('username', username)
-      .maybeSingle();
 
     if (!profileData) {
       setProfile(null);
@@ -47,35 +50,25 @@ export default function ProfilePage() {
     setProfile(profileData);
     setDisplayNameDraft(profileData.display_name || '');
 
-    const { count: followers } = await supabase
-      .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('following_id', profileData.id);
-    setFollowerCount(followers || 0);
+    // Now fire off everything else in parallel instead of one-by-one
+    const [followersRes, followingRes, followRowRes, songsRes] = await Promise.all([
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profileData.id),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profileData.id),
+      myId
+        ? supabase.from('follows').select('*').eq('follower_id', myId).eq('following_id', profileData.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      supabase
+        .from('songs')
+        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at')
+        .eq('uploader_id', profileData.id)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false }),
+    ]);
 
-    const { count: following } = await supabase
-      .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('follower_id', profileData.id);
-    setFollowingCount(following || 0);
-
-    if (myId) {
-      const { data: followRow } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', myId)
-        .eq('following_id', profileData.id)
-        .maybeSingle();
-      setIsFollowing(!!followRow);
-    }
-
-    const { data: songsData } = await supabase
-      .from('songs')
-      .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at')
-      .eq('uploader_id', profileData.id)
-      .eq('status', 'approved')
-      .order('created_at', { ascending: false });
-    setSongs(songsData || []);
+    setFollowerCount(followersRes.count || 0);
+    setFollowingCount(followingRes.count || 0);
+    setIsFollowing(!!followRowRes.data);
+    setSongs(songsRes.data || []);
 
     setLoading(false);
   };
@@ -136,7 +129,13 @@ export default function ProfilePage() {
     playQueue(songs, index);
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="content-area" style={{ paddingTop: '30px' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+      </div>
+    );
+  }
 
   if (!profile) {
     return (
@@ -288,4 +287,4 @@ export default function ProfilePage() {
       </div>
     </>
   );
-              }
+}
