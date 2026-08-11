@@ -23,8 +23,6 @@ export default function SignupPage() {
       return;
     }
 
-    // Best-effort check so people get quick feedback, though the real
-    // guarantee happens at confirmation time via the database.
     const { data: existing } = await supabase
       .from('profiles')
       .select('id')
@@ -42,6 +40,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { username: cleanUsername },
+        emailRedirectTo: `${window.location.origin}/auth/confirmed`,
       },
     });
 
