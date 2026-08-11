@@ -164,22 +164,6 @@ export default function NowPlayingFull() {
             <div className="np-title">{currentSong.title}</div>
             <div className="np-artist">{currentSong.artist}</div>
 
-            {currentSong.uploaderUsername && (
-              <Link
-                href={`/profile/${currentSong.uploaderUsername}`}
-                onClick={() => setExpanded(false)}
-                style={{
-                  color: 'var(--text-muted)',
-                  fontSize: '12px',
-                  fontFamily: 'var(--font-mono)',
-                  marginTop: '4px',
-                  textDecoration: 'underline',
-                }}
-              >
-                Uploaded by @{currentSong.uploaderUsername}
-              </Link>
-            )}
-
             <div className="np-action-row">
               <button className={`np-pill ${liked ? 'active' : ''} ${likeAnimating ? 'burst-ring' : ''}`} onClick={toggleLiked}>
                 <i className={`${liked ? 'fas fa-heart' : 'far fa-heart'} ${likeAnimating ? 'like-pop' : ''}`}></i>
@@ -203,6 +187,32 @@ export default function NowPlayingFull() {
             </div>
 
             <div className="np-transport-row">
+              {currentSong.uploaderUsername ? (
+                <Link
+                  href={`/profile/${currentSong.uploaderUsername}`}
+                  onClick={() => setExpanded(false)}
+                  style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '50%',
+                    background: currentSong.uploaderAvatarUrl
+                      ? `url(${currentSong.uploaderAvatarUrl}) center/cover`
+                      : 'var(--accent)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {!currentSong.uploaderAvatarUrl && currentSong.uploaderUsername.charAt(0).toUpperCase()}
+                </Link>
+              ) : (
+                <div style={{ width: '26px' }}></div>
+              )}
+
               <button
                 className={`np-transport-btn small ${shuffle ? 'active' : ''}`}
                 onClick={toggleShuffle}
@@ -262,4 +272,4 @@ export default function NowPlayingFull() {
       )}
     </div>
   );
-}
+         }
