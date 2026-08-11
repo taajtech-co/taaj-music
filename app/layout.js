@@ -1,5 +1,6 @@
 import './globals.css';
 import { PlayerProvider } from '../context/PlayerContext';
+import { DataCacheProvider } from '../context/DataCacheContext';
 import BottomNav from '../components/BottomNav';
 import LoadingSplash from '../components/LoadingSplash';
 import PageTransition from '../components/PageTransition';
@@ -43,9 +44,11 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <LoadingSplash />
-        <PlayerProvider>
-          <PageTransition>{children}</PageTransition>
-        </PlayerProvider>
+        <DataCacheProvider>
+          <PlayerProvider>
+            <PageTransition>{children}</PageTransition>
+          </PlayerProvider>
+        </DataCacheProvider>
         <BottomNav />
       </body>
     </html>
