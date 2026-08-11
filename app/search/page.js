@@ -1,38 +1,42 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
 import Navbar from '../../components/Navbar';
 import { useSongPlayer } from '../../context/PlayerContext';
+import { useCachedQuery } from '../../lib/useCachedQuery';
+
+async function fetchApprovedSongs() {
+  const { data, error } = await supabase
+    .from('songs')
+    .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+async function fetchAllUsers() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username, display_name, avatar_path');
+  if (error) throw error;
+  return data;
+}
 
 export default function SearchPage() {
-  const [songs, setSongs] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const { playQueue } = useSongPlayer();
 
-  useEffect(() => {
-    const loadData = async () => {
-      const { data: songsData, error: songsError } = await supabase
-        .from('songs')
-        .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
+  // Reuses the same cache key as the Home page, so if you already visited
+  // Home, Search opens with the songs already available instantly.
+  const { data: songs, loading: songsLoading } = useCachedQuery('songs:approved', fetchApprovedSongs);
+  const { data: users, loading: usersLoading } = useCachedQuery('users:all', fetchAllUsers);
 
-      if (!songsError) setSongs(songsData);
-
-      const { data: usersData, error: usersError } = await supabase
-        .from('profiles')
-        .select('id, username, display_name, avatar_path');
-
-      if (!usersError) setUsers(usersData);
-
-      setLoading(false);
-    };
-    loadData();
-  }, []);
+  const loading = songsLoading || usersLoading;
+  const allSongs = songs || [];
+  const allUsers = users || [];
 
   const coverUrl = (song) => {
     if (!song.cover_path) return null;
@@ -46,12 +50,12 @@ export default function SearchPage() {
 
   const q = query.trim().toLowerCase();
 
-  const filteredSongs = songs.filter((song) => {
+  const filteredSongs = allSongs.filter((song) => {
     if (!q) return false;
     return song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
   });
 
-  const filteredUsers = users.filter((u) => {
+  const filteredUsers = allUsers.filter((u) => {
     if (!q) return false;
     return u.username.toLowerCase().includes(q) || (u.display_name || '').toLowerCase().includes(q);
   });
@@ -143,4 +147,4 @@ export default function SearchPage() {
       </div>
     </>
   );
-                }
+    }
