@@ -7,10 +7,16 @@ import Navbar from '../../components/Navbar';
 export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminId, setAdminId] = useState(null);
   const [pending, setPending] = useState([]);
   const [deleteRequests, setDeleteRequests] = useState([]);
   const [approved, setApproved] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [announceTitle, setAnnounceTitle] = useState('');
+  const [announceBody, setAnnounceBody] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [announceMsg, setAnnounceMsg] = useState('');
 
   useEffect(() => {
     const check = async () => {
@@ -32,6 +38,7 @@ export default function AdminPage() {
       }
 
       setIsAdmin(true);
+      setAdminId(sessionData.session.user.id);
       setChecking(false);
       loadAll();
     };
@@ -89,6 +96,29 @@ export default function AdminPage() {
     loadAll();
   };
 
+  const postAnnouncement = async () => {
+    if (!announceTitle.trim()) return;
+    setPosting(true);
+    setAnnounceMsg('');
+
+    const { error } = await supabase.from('inbox_posts').insert({
+      type: 'announcement',
+      title: announceTitle.trim(),
+      body: announceBody.trim() || null,
+      posted_by: adminId,
+    });
+
+    setPosting(false);
+
+    if (error) {
+      setAnnounceMsg('Failed to post: ' + error.message);
+    } else {
+      setAnnounceMsg('Posted to everyone\'s inbox.');
+      setAnnounceTitle('');
+      setAnnounceBody('');
+    }
+  };
+
   if (checking || !isAdmin) return null;
 
   return (
@@ -97,14 +127,49 @@ export default function AdminPage() {
       <div className="content-area">
         <h1 className="section-title">Admin review</h1>
 
-        {loading && <p style={{ color: 'var(--gray)' }}>Loading...</p>}
+        <h2 style={{ fontSize: '18px', margin: '10px 0 10px' }}>Post an announcement</h2>
+        <div className="upload-card" style={{ marginBottom: '10px' }}>
+          <input
+            type="text"
+            placeholder="Announcement title"
+            value={announceTitle}
+            onChange={(e) => setAnnounceTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Details (optional)"
+            value={announceBody}
+            onChange={(e) => setAnnounceBody(e.target.value)}
+            style={{
+              width: '100%',
+              minHeight: '70px',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-2)',
+              color: 'var(--text)',
+              fontSize: '14px',
+              marginBottom: '15px',
+              fontFamily: 'var(--font-body)',
+            }}
+          />
+          {announceMsg && (
+            <div className="error-msg" style={{ background: 'rgba(47,209,197,0.12)', color: 'var(--accent-2)' }}>
+              {announceMsg}
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={postAnnouncement} disabled={posting} style={{ width: '100%', padding: '12px', borderRadius: '999px' }}>
+            {posting ? 'Posting...' : 'Post to everyone'}
+          </button>
+        </div>
+
+        {loading && <p style={{ color: 'var(--text-muted)' }}>Loading...</p>}
 
         {!loading && (
           <>
-            <h2 style={{ fontSize: '18px', margin: '20px 0 10px' }}>
+            <h2 style={{ fontSize: '18px', margin: '30px 0 10px' }}>
               Pending uploads ({pending.length})
             </h2>
-            {pending.length === 0 && <p style={{ color: 'var(--gray)' }}>Nothing pending.</p>}
+            {pending.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Nothing pending.</p>}
             {pending.map((song) => (
               <div key={song.id} className="card" style={{ marginBottom: '12px' }}>
                 <div className="card-title">{song.title}</div>
@@ -120,7 +185,7 @@ export default function AdminPage() {
             <h2 style={{ fontSize: '18px', margin: '30px 0 10px' }}>
               Deletion requests ({deleteRequests.length})
             </h2>
-            {deleteRequests.length === 0 && <p style={{ color: 'var(--gray)' }}>None right now.</p>}
+            {deleteRequests.length === 0 && <p style={{ color: 'var(--text-muted)' }}>None right now.</p>}
             {deleteRequests.map((song) => (
               <div key={song.id} className="card" style={{ marginBottom: '12px' }}>
                 <div className="card-title">{song.title}</div>
