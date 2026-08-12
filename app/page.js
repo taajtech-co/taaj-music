@@ -9,7 +9,7 @@ import { useCachedQuery } from '../lib/useCachedQuery';
 async function fetchApprovedSongs() {
   const { data, error } = await supabase
     .from('songs')
-    .select('id, title, artist, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
+    .select('id, title, artist, genre, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -18,6 +18,7 @@ async function fetchApprovedSongs() {
 
 export default function HomePage() {
   const [query, setQuery] = useState('');
+  const [activeGenre, setActiveGenre] = useState('All');
   const { playQueue } = useSongPlayer();
   const { data: songs, loading } = useCachedQuery('songs:approved', fetchApprovedSongs);
 
@@ -28,7 +29,13 @@ export default function HomePage() {
 
   const allSongs = songs || [];
 
-  const filteredSongs = allSongs.filter((song) => {
+  const genresPresent = ['All', ...new Set(allSongs.map((s) => s.genre).filter(Boolean))];
+
+  const genreFiltered = activeGenre === 'All'
+    ? allSongs
+    : allSongs.filter((s) => s.genre === activeGenre);
+
+  const filteredSongs = genreFiltered.filter((song) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
@@ -62,8 +69,24 @@ export default function HomePage() {
         </div>
       </div>
 
+      {!loading && genresPresent.length > 1 && (
+        <div className="genre-chips">
+          {genresPresent.map((g) => (
+            <button
+              key={g}
+              className={`genre-chip ${activeGenre === g ? 'active' : ''}`}
+              onClick={() => setActiveGenre(g)}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="content-area">
-        <h2 className="section-title">{query ? `Results for "${query}"` : 'All songs'}</h2>
+        <h2 className="section-title">
+          {query ? `Results for "${query}"` : (activeGenre === 'All' ? 'All songs' : activeGenre)}
+        </h2>
 
         {loading && <p style={{ color: 'var(--text-muted)' }}>Loading songs...</p>}
 
@@ -92,4 +115,4 @@ export default function HomePage() {
       </div>
     </>
   );
-      }
+}
