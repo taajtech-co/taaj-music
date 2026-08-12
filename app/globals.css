@@ -1243,3 +1243,34 @@ a:focus, button:focus {
 * {
   -webkit-tap-highlight-color: transparent;
     }
+/* ===== Genre filter chips ===== */
+.genre-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 24px 16px;
+  scrollbar-width: none;
+}
+
+.genre-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-chip {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.genre-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  }
