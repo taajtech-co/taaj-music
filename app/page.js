@@ -32,7 +32,7 @@ export default function HomePage() {
   const trending = [...allSongs]
     .filter((s) => s.play_count > 0)
     .sort((a, b) => b.play_count - a.play_count)
-    .slice(0, 10);
+    .slice(0, 12);
 
   const genresPresent = ['All', ...new Set(allSongs.map((s) => s.genre).filter(Boolean))];
 
@@ -98,33 +98,37 @@ export default function HomePage() {
             <i className="fas fa-fire" style={{ color: '#F5A623', fontSize: '16px' }}></i>
             Trending now
           </h2>
-          <div className="cards-grid" style={{ marginBottom: '10px' }}>
-            {trending.map((song, index) => (
-              <div className="card" key={song.id} onClick={() => playTrendingAt(index)} style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    background: 'rgba(0,0,0,0.55)',
-                    color: 'white',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    padding: '2px 7px',
-                    borderRadius: '999px',
-                  }}
-                >
-                  #{index + 1}
-                </div>
-                <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
-                  {!coverUrl(song) && <i className="fas fa-music"></i>}
-                </div>
-                <div className="card-title">{song.title}</div>
-                <div className="card-desc">{song.artist}</div>
+        </div>
+      )}
+
+      {!loading && !query && trending.length > 0 && (
+        <div className="trending-scroll-grid">
+          {trending.map((song, index) => (
+            <div className="card" key={song.id} onClick={() => playTrendingAt(index)} style={{ position: 'relative' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '8px',
+                  left: '8px',
+                  background: 'rgba(0,0,0,0.55)',
+                  color: 'white',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '999px',
+                  zIndex: 2,
+                }}
+              >
+                #{index + 1}
               </div>
-            ))}
-          </div>
+              <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
+                {!coverUrl(song) && <i className="fas fa-music"></i>}
+              </div>
+              <div className="card-title">{song.title}</div>
+              <div className="card-desc">{song.artist}</div>
+            </div>
+          ))}
         </div>
       )}
 
