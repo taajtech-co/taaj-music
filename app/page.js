@@ -16,6 +16,14 @@ async function fetchApprovedSongs() {
   return data;
 }
 
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) {
+    out.push(arr.slice(i, i + size));
+  }
+  return out;
+}
+
 export default function HomePage() {
   const [query, setQuery] = useState('');
   const [activeGenre, setActiveGenre] = useState('All');
@@ -33,6 +41,8 @@ export default function HomePage() {
     .filter((s) => s.play_count > 0)
     .sort((a, b) => b.play_count - a.play_count)
     .slice(0, 12);
+
+  const trendingPages = chunk(trending, 6);
 
   const genresPresent = ['All', ...new Set(allSongs.map((s) => s.genre).filter(Boolean))];
 
@@ -93,43 +103,45 @@ export default function HomePage() {
       )}
 
       {!loading && !query && trending.length > 0 && (
-        <div className="content-area" style={{ paddingBottom: 0 }}>
-          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <i className="fas fa-fire" style={{ color: '#F5A623', fontSize: '16px' }}></i>
-            Trending now
-          </h2>
-        </div>
-      )}
+        <>
+          <div className="content-area" style={{ paddingBottom: 0 }}>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="fas fa-fire" style={{ color: '#F5A623', fontSize: '16px' }}></i>
+              Trending now
+            </h2>
+          </div>
 
-      {!loading && !query && trending.length > 0 && (
-        <div className="trending-scroll-grid">
-          {trending.map((song, index) => (
-            <div className="card" key={song.id} onClick={() => playTrendingAt(index)} style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '8px',
-                  left: '8px',
-                  background: 'rgba(0,0,0,0.55)',
-                  color: 'white',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '2px 6px',
-                  borderRadius: '999px',
-                  zIndex: 2,
-                }}
-              >
-                #{index + 1}
+          <div className="trending-pager">
+            {trendingPages.map((page, pageIndex) => (
+              <div className="trending-page" key={pageIndex}>
+                <div className="trending-page-grid">
+                  {page.map((song, i) => {
+                    const overallIndex = pageIndex * 6 + i;
+                    return (
+                      <div
+                        className="trending-row"
+                        key={song.id}
+                        onClick={() => playTrendingAt(overallIndex)}
+                      >
+                        <div className="trending-row-rank">#{overallIndex + 1}</div>
+                        <div
+                          className="trending-row-thumb"
+                          style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}
+                        >
+                          {!coverUrl(song) && <i className="fas fa-music"></i>}
+                        </div>
+                        <div className="trending-row-info">
+                          <div className="trending-row-title">{song.title}</div>
+                          <div className="trending-row-artist">{song.artist}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
-                {!coverUrl(song) && <i className="fas fa-music"></i>}
-              </div>
-              <div className="card-title">{song.title}</div>
-              <div className="card-desc">{song.artist}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
 
       <div className="content-area">
