@@ -11,6 +11,7 @@ export function PlayerProvider({ children }) {
   const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -47,26 +48,39 @@ export function PlayerProvider({ children }) {
     setCurrentIndex(startIndex);
     setIsPlaying(true);
     setExpanded(true);
+
+    // Count this as a play for trending purposes
+    const song = songs[startIndex];
+    if (song?.id) {
+      supabase.rpc('increment_play_count', { song_id: song.id }).then(() => {});
+    }
   };
 
   const playNext = () => {
     if (queue.length === 0) return;
+    let nextIdx = null;
     if (shuffle) {
       if (queue.length === 1) return;
       let next;
       do {
         next = Math.floor(Math.random() * queue.length);
       } while (next === currentIndex);
+      nextIdx = next;
       setCurrentIndex(next);
     } else {
       const next = currentIndex + 1;
       if (next < queue.length) {
+        nextIdx = next;
         setCurrentIndex(next);
       } else if (repeatMode === 'all') {
+        nextIdx = 0;
         setCurrentIndex(0);
       }
     }
     setIsPlaying(true);
+    if (nextIdx !== null && queue[nextIdx]?.id) {
+      supabase.rpc('increment_play_count', { song_id: queue[nextIdx].id }).then(() => {});
+    }
   };
 
   const playPrev = () => {
@@ -108,6 +122,9 @@ export function PlayerProvider({ children }) {
     const onLoadedMetadata = () => setDuration(audio.duration);
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
+    const onWaiting = () => setIsBuffering(true);
+    const onPlaying = () => setIsBuffering(false);
+    const onCanPlay = () => setIsBuffering(false);
     const onEnded = () => {
       if (repeatMode === 'one') {
         audio.currentTime = 0;
@@ -121,13 +138,21 @@ export function PlayerProvider({ children }) {
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
+    audio.addEventListener('waiting', onWaiting);
+    audio.addEventListener('playing', onPlaying);
+    audio.addEventListener('canplay', onCanPlay);
     audio.addEventListener('ended', onEnded);
+
+    setIsBuffering(true);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('waiting', onWaiting);
+      audio.removeEventListener('playing', onPlaying);
+      audio.removeEventListener('canplay', onCanPlay);
       audio.removeEventListener('ended', onEnded);
     };
   }, [currentIndex, repeatMode, shuffle, queue]);
@@ -140,6 +165,7 @@ export function PlayerProvider({ children }) {
         playNext,
         playPrev,
         isPlaying,
+        isBuffering,
         togglePlay,
         expanded,
         setExpanded,
@@ -170,4 +196,4 @@ export function useSongPlayer() {
   const ctx = useContext(PlayerContext);
   if (!ctx) throw new Error('useSongPlayer must be used within PlayerProvider');
   return ctx;
-}
+      }
