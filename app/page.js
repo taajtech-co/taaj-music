@@ -9,7 +9,7 @@ import { useCachedQuery } from '../lib/useCachedQuery';
 async function fetchApprovedSongs() {
   const { data, error } = await supabase
     .from('songs')
-    .select('id, title, artist, genre, storage_path, cover_path, lyrics, timed_lyrics, created_at, profiles(username, avatar_path)')
+    .select('id, title, artist, genre, storage_path, cover_path, lyrics, timed_lyrics, play_count, created_at, profiles(username, avatar_path)')
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -29,6 +29,11 @@ export default function HomePage() {
 
   const allSongs = songs || [];
 
+  const trending = [...allSongs]
+    .filter((s) => s.play_count > 0)
+    .sort((a, b) => b.play_count - a.play_count)
+    .slice(0, 10);
+
   const genresPresent = ['All', ...new Set(allSongs.map((s) => s.genre).filter(Boolean))];
 
   const genreFiltered = activeGenre === 'All'
@@ -43,6 +48,10 @@ export default function HomePage() {
 
   const playSongAt = (index) => {
     playQueue(filteredSongs, index);
+  };
+
+  const playTrendingAt = (index) => {
+    playQueue(trending, index);
   };
 
   return (
@@ -83,6 +92,42 @@ export default function HomePage() {
         </div>
       )}
 
+      {!loading && !query && trending.length > 0 && (
+        <div className="content-area" style={{ paddingBottom: 0 }}>
+          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="fas fa-fire" style={{ color: '#F5A623', fontSize: '16px' }}></i>
+            Trending now
+          </h2>
+          <div className="cards-grid" style={{ marginBottom: '10px' }}>
+            {trending.map((song, index) => (
+              <div className="card" key={song.id} onClick={() => playTrendingAt(index)} style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    background: 'rgba(0,0,0,0.55)',
+                    color: 'white',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                  }}
+                >
+                  #{index + 1}
+                </div>
+                <div className="card-img" style={coverUrl(song) ? { background: `url(${coverUrl(song)}) center/cover` } : {}}>
+                  {!coverUrl(song) && <i className="fas fa-music"></i>}
+                </div>
+                <div className="card-title">{song.title}</div>
+                <div className="card-desc">{song.artist}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="content-area">
         <h2 className="section-title">
           {query ? `Results for "${query}"` : (activeGenre === 'All' ? 'All songs' : activeGenre)}
@@ -115,4 +160,4 @@ export default function HomePage() {
       </div>
     </>
   );
-}
+      }
