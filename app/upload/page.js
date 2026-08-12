@@ -4,11 +4,17 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Navbar from '../../components/Navbar';
 
+const GENRES = [
+  'Afrobeats', 'Hip-Hop', 'R&B', 'Pop', 'Gospel', 'Amapiano',
+  'Dancehall', 'Rock', 'Electronic', 'Country', 'Jazz', 'Other',
+];
+
 export default function UploadPage() {
   const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(true);
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
+  const [genre, setGenre] = useState('');
   const [file, setFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [error, setError] = useState('');
@@ -73,6 +79,7 @@ export default function UploadPage() {
     const { error: insertError } = await supabase.from('songs').insert({
       title,
       artist,
+      genre: genre || null,
       storage_path: filePath,
       cover_path: coverPath,
       uploader_id: session.user.id,
@@ -88,6 +95,7 @@ export default function UploadPage() {
     setSuccess('Song submitted! It will appear once approved by an admin.');
     setTitle('');
     setArtist('');
+    setGenre('');
     setFile(null);
     setCoverFile(null);
     setUploading(false);
@@ -118,6 +126,29 @@ export default function UploadPage() {
             onChange={(e) => setArtist(e.target.value)}
             required
           />
+
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+            Genre
+          </label>
+          <select
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '11px 13px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-2)',
+              color: 'var(--text)',
+              marginBottom: '15px',
+              fontSize: '14px',
+            }}
+          >
+            <option value="">Select a genre (optional)</option>
+            {GENRES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
 
           <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
             Audio file
@@ -151,4 +182,4 @@ export default function UploadPage() {
       </div>
     </>
   );
-                                         }
+    }
