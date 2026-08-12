@@ -1294,3 +1294,39 @@ a:focus, button:focus {
   height: 22px;
   border-width: 3px;
 }
+/* ===== Trending: horizontal-scrolling 3x2 paged grid ===== */
+.trending-scroll-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-columns: calc((100% - 20px) / 3);
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 24px 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trending-scroll-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.trending-scroll-grid .card {
+  scroll-snap-align: start;
+  padding: 10px;
+}
+
+.trending-scroll-grid .card-img {
+  aspect-ratio: 1/1;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.trending-scroll-grid .card-title {
+  font-size: 12px;
+}
+
+.trending-scroll-grid .card-desc {
+  font-size: 11px;
+  }
