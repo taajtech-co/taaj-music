@@ -50,8 +50,8 @@ export default function Navbar() {
 
       <div className="header-right">
         {session ? (
-          <Link href="/inbox" className="icon-btn" style={{ position: 'relative' }}>
-            <i className="fas fa-bell"></i>
+          <Link href="/hub" className="icon-btn" style={{ position: 'relative' }}>
+            <i className="fas fa-users"></i>
             {unreadCount > 0 && (
               <span
                 style={{
