@@ -23,6 +23,7 @@ export default function NowPlayingFull() {
   const {
     currentSong,
     isPlaying,
+    isBuffering,
     togglePlay,
     setExpanded,
     currentTime,
@@ -223,7 +224,11 @@ export default function NowPlayingFull() {
                 <i className="fas fa-backward-step"></i>
               </button>
               <button className="np-play-btn" onClick={togglePlay} style={{ marginBottom: 0 }}>
-                <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+                {isBuffering ? (
+                  <span className="buffering-spinner large"></span>
+                ) : (
+                  <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+                )}
               </button>
               <button className="np-transport-btn" onClick={playNext} disabled={!hasNext}>
                 <i className="fas fa-forward-step"></i>
@@ -272,4 +277,4 @@ export default function NowPlayingFull() {
       )}
     </div>
   );
-         }
+  }
