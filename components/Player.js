@@ -3,7 +3,7 @@
 import { useSongPlayer } from '../context/PlayerContext';
 
 export default function Player() {
-  const { currentSong, isPlaying, togglePlay, setExpanded } = useSongPlayer();
+  const { currentSong, isPlaying, isBuffering, togglePlay, setExpanded } = useSongPlayer();
 
   if (!currentSong) return null;
 
@@ -29,8 +29,12 @@ export default function Player() {
           togglePlay();
         }}
       >
-        <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+        {isBuffering ? (
+          <span className="buffering-spinner"></span>
+        ) : (
+          <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'}></i>
+        )}
       </button>
     </div>
   );
-  }
+}
