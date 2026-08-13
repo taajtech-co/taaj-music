@@ -18,6 +18,11 @@ export default function AdminPage() {
   const [posting, setPosting] = useState(false);
   const [announceMsg, setAnnounceMsg] = useState('');
 
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState(['', '']);
+  const [creatingPoll, setCreatingPoll] = useState(false);
+  const [pollMsg, setPollMsg] = useState('');
+
   useEffect(() => {
     const check = async () => {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -119,6 +124,57 @@ export default function AdminPage() {
     }
   };
 
+  const updatePollOption = (index, value) => {
+    setPollOptions((prev) => prev.map((o, i) => (i === index ? value : o)));
+  };
+
+  const addPollOption = () => {
+    if (pollOptions.length >= 6) return;
+    setPollOptions((prev) => [...prev, '']);
+  };
+
+  const removePollOption = (index) => {
+    if (pollOptions.length <= 2) return;
+    setPollOptions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const createPoll = async () => {
+    const cleanOptions = pollOptions.map((o) => o.trim()).filter(Boolean);
+    if (!pollQuestion.trim() || cleanOptions.length < 2) {
+      setPollMsg('Add a question and at least 2 options.');
+      return;
+    }
+
+    setCreatingPoll(true);
+    setPollMsg('');
+
+    const { data: poll, error: pollError } = await supabase
+      .from('polls')
+      .insert({ question: pollQuestion.trim(), created_by: adminId })
+      .select()
+      .single();
+
+    if (pollError || !poll) {
+      setPollMsg('Failed to create poll: ' + (pollError?.message || 'unknown error'));
+      setCreatingPoll(false);
+      return;
+    }
+
+    const { error: optionsError } = await supabase
+      .from('poll_options')
+      .insert(cleanOptions.map((text) => ({ poll_id: poll.id, option_text: text })));
+
+    setCreatingPoll(false);
+
+    if (optionsError) {
+      setPollMsg('Poll created but options failed: ' + optionsError.message);
+    } else {
+      setPollMsg('Poll posted to Hub.');
+      setPollQuestion('');
+      setPollOptions(['', '']);
+    }
+  };
+
   if (checking || !isAdmin) return null;
 
   return (
@@ -140,16 +196,9 @@ export default function AdminPage() {
             value={announceBody}
             onChange={(e) => setAnnounceBody(e.target.value)}
             style={{
-              width: '100%',
-              minHeight: '70px',
-              padding: '10px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '14px',
-              marginBottom: '15px',
-              fontFamily: 'var(--font-body)',
+              width: '100%', minHeight: '70px', padding: '10px 12px', borderRadius: '8px',
+              border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)',
+              fontSize: '14px', marginBottom: '15px', fontFamily: 'var(--font-body)',
             }}
           />
           {announceMsg && (
@@ -159,6 +208,48 @@ export default function AdminPage() {
           )}
           <button className="btn btn-primary" onClick={postAnnouncement} disabled={posting} style={{ width: '100%', padding: '12px', borderRadius: '999px' }}>
             {posting ? 'Posting...' : 'Post to everyone'}
+          </button>
+        </div>
+
+        <h2 style={{ fontSize: '18px', margin: '30px 0 10px' }}>Create a poll</h2>
+        <div className="upload-card" style={{ marginBottom: '10px' }}>
+          <input
+            type="text"
+            placeholder="Poll question"
+            value={pollQuestion}
+            onChange={(e) => setPollQuestion(e.target.value)}
+          />
+          {pollOptions.map((opt, i) => (
+            <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <input
+                type="text"
+                placeholder={`Option ${i + 1}`}
+                value={opt}
+                onChange={(e) => updatePollOption(i, e.target.value)}
+                style={{ flex: 1 }}
+              />
+              {pollOptions.length > 2 && (
+                <button
+                  onClick={() => removePollOption(i)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '16px', cursor: 'pointer' }}
+                >
+                  <i className="fas fa-trash"></i>
+                </button>
+              )}
+            </div>
+          ))}
+          {pollOptions.length < 6 && (
+            <button className="btn btn-outline" onClick={addPollOption} style={{ marginBottom: '15px', fontSize: '13px' }}>
+              + Add option
+            </button>
+          )}
+          {pollMsg && (
+            <div className="error-msg" style={{ background: 'rgba(47,209,197,0.12)', color: 'var(--accent-2)' }}>
+              {pollMsg}
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={createPoll} disabled={creatingPoll} style={{ width: '100%', padding: '12px', borderRadius: '999px' }}>
+            {creatingPoll ? 'Creating...' : 'Post poll to Hub'}
           </button>
         </div>
 
@@ -216,4 +307,4 @@ export default function AdminPage() {
       </div>
     </>
   );
-}
+    }
