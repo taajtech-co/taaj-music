@@ -1415,3 +1415,91 @@ a:focus, button:focus {
   grid-template-rows: repeat(3, auto);
   column-gap: 24px;
     }
+/* ===== Hub tabs ===== */
+.hub-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px 16px;
+}
+
+.hub-tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.hub-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* Song request rows */
+.request-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.upvote-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.upvote-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* Poll options */
+.poll-option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.poll-option-fill {
+  position: absolute;
+  inset: 0;
+  background: rgba(110, 86, 207, 0.18);
+  z-index: 0;
+}
+
+.poll-option-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+}
