@@ -20,12 +20,11 @@ export default function HubPage() {
   const [checking, setChecking] = useState(true);
   const [userId, setUserId] = useState(null);
   const [tab, setTab] = useState('inbox');
+  const [inboxUnread, setInboxUnread] = useState(0);
 
-  // Inbox state
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
 
-  // Requests state
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [myVotes, setMyVotes] = useState(new Set());
@@ -34,10 +33,12 @@ export default function HubPage() {
   const [reqNote, setReqNote] = useState('');
   const [submittingReq, setSubmittingReq] = useState(false);
 
-  // Polls state
   const [polls, setPolls] = useState([]);
   const [pollsLoading, setPollsLoading] = useState(true);
   const [myPollVotes, setMyPollVotes] = useState({});
+
+  const unvotedPollCount = polls.filter((p) => !p.closed && !myPollVotes[p.id]).length;
+  const unvotedRequestCount = requests.filter((r) => r.requester_id !== userId && !myVotes.has(r.id)).length;
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -47,6 +48,20 @@ export default function HubPage() {
       }
       setUserId(data.session.user.id);
       setChecking(false);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_seen_new_songs')
+        .eq('id', data.session.user.id)
+        .single();
+
+      const lastSeen = profile?.last_seen_new_songs || '1970-01-01';
+      const { count } = await supabase
+        .from('inbox_posts')
+        .select('*', { count: 'exact', head: true })
+        .gt('created_at', lastSeen);
+      setInboxUnread(count || 0);
+
       loadInbox();
       loadRequests(data.session.user.id);
       loadPolls(data.session.user.id);
@@ -58,7 +73,6 @@ export default function HubPage() {
     });
   }, []);
 
-  // ===== Inbox =====
   const loadInbox = async () => {
     setPostsLoading(true);
     const { data } = await supabase
@@ -70,12 +84,11 @@ export default function HubPage() {
     setPostsLoading(false);
   };
 
-  // ===== Song requests =====
   const loadRequests = async (uid) => {
     setRequestsLoading(true);
     const { data } = await supabase
       .from('song_requests')
-      .select('id, title, artist, note, vote_count, created_at')
+      .select('id, title, artist, note, vote_count, requester_id, created_at')
       .order('vote_count', { ascending: false })
       .limit(50);
     setRequests(data || []);
@@ -106,7 +119,6 @@ export default function HubPage() {
       .single();
 
     if (!error && data) {
-      // Auto-upvote your own request
       await supabase.from('song_request_votes').insert({ request_id: data.id, user_id: userId });
       setReqTitle('');
       setReqArtist('');
@@ -133,7 +145,6 @@ export default function HubPage() {
     }
   };
 
-  // ===== Polls =====
   const loadPolls = async (uid) => {
     setPollsLoading(true);
     const { data: pollsData } = await supabase
@@ -176,6 +187,22 @@ export default function HubPage() {
 
   if (checking) return null;
 
+  const TabBadge = ({ count }) =>
+    count > 0 ? (
+      <span
+        style={{
+          marginLeft: '6px',
+          background: 'rgba(255,255,255,0.25)',
+          borderRadius: '999px',
+          fontSize: '10px',
+          fontWeight: 700,
+          padding: '1px 6px',
+        }}
+      >
+        {count > 9 ? '9+' : count}
+      </span>
+    ) : null;
+
   return (
     <>
       <div className="settings-topbar">
@@ -185,9 +212,15 @@ export default function HubPage() {
       </div>
 
       <div className="hub-tabs">
-        <button className={`hub-tab ${tab === 'inbox' ? 'active' : ''}`} onClick={() => setTab('inbox')}>Inbox</button>
-        <button className={`hub-tab ${tab === 'requests' ? 'active' : ''}`} onClick={() => setTab('requests')}>Requests</button>
-        <button className={`hub-tab ${tab === 'polls' ? 'active' : ''}`} onClick={() => setTab('polls')}>Polls</button>
+        <button className={`hub-tab ${tab === 'inbox' ? 'active' : ''}`} onClick={() => setTab('inbox')}>
+          Inbox<TabBadge count={inboxUnread} />
+        </button>
+        <button className={`hub-tab ${tab === 'requests' ? 'active' : ''}`} onClick={() => setTab('requests')}>
+          Requests<TabBadge count={unvotedRequestCount} />
+        </button>
+        <button className={`hub-tab ${tab === 'polls' ? 'active' : ''}`} onClick={() => setTab('polls')}>
+          Polls<TabBadge count={unvotedPollCount} />
+        </button>
       </div>
 
       <div className="content-area" style={{ paddingTop: 0 }}>
@@ -325,4 +358,4 @@ export default function HubPage() {
       </div>
     </>
   );
-}
+                                    }
