@@ -43,6 +43,7 @@ export default function HomePage() {
     .slice(0, 12);
 
   const trendingPages = chunk(trending, 6);
+  const showTrending = !loading && !query && activeGenre === 'All' && trending.length > 0;
 
   const genresPresent = ['All', ...new Set(allSongs.map((s) => s.genre).filter(Boolean))];
 
@@ -102,7 +103,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {!loading && !query && trending.length > 0 && (
+      {showTrending && (
         <>
           <div className="content-area" style={{ paddingBottom: 0 }}>
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -176,4 +177,4 @@ export default function HomePage() {
       </div>
     </>
   );
-      }
+  }
