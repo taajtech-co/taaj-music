@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [pending, setPending] = useState([]);
   const [deleteRequests, setDeleteRequests] = useState([]);
   const [approved, setApproved] = useState([]);
+  const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [announceTitle, setAnnounceTitle] = useState('');
@@ -72,9 +73,16 @@ export default function AdminPage() {
       .eq('delete_requested', false)
       .order('created_at', { ascending: false });
 
+    const { data: payoutReqs } = await supabase
+      .from('payout_requests')
+      .select('id, artist_id, amount_kobo, payout_method, status, created_at, profiles(username, display_name)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+
     setPending(pendingSongs || []);
     setDeleteRequests(deleteReqs || []);
     setApproved(approvedSongs || []);
+    setPayouts(payoutReqs || []);
     setLoading(false);
   };
 
@@ -98,6 +106,19 @@ export default function AdminPage() {
 
   const denyDelete = async (id) => {
     await supabase.from('songs').update({ delete_requested: false }).eq('id', id);
+    loadAll();
+  };
+
+  const markPayoutPaid = async (id) => {
+    await supabase
+      .from('payout_requests')
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
+      .eq('id', id);
+    loadAll();
+  };
+
+  const rejectPayout = async (id) => {
+    await supabase.from('payout_requests').update({ status: 'rejected' }).eq('id', id);
     loadAll();
   };
 
@@ -183,7 +204,34 @@ export default function AdminPage() {
       <div className="content-area">
         <h1 className="section-title">Admin review</h1>
 
-        <h2 style={{ fontSize: '18px', margin: '10px 0 10px' }}>Post an announcement</h2>
+        {!loading && payouts.length > 0 && (
+          <>
+            <h2 style={{ fontSize: '18px', margin: '10px 0 10px' }}>
+              Pending payouts ({payouts.length})
+            </h2>
+            {payouts.map((p) => (
+              <div key={p.id} className="card" style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div className="card-title">GH₵{(p.amount_kobo / 100).toFixed(2)}</div>
+                    <div className="card-desc">
+                      {p.profiles?.display_name || `@${p.profiles?.username}`}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Send to: {p.payout_method}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <button className="btn btn-primary" onClick={() => markPayoutPaid(p.id)}>Mark as paid</button>
+                  <button className="btn btn-outline" onClick={() => rejectPayout(p.id)}>Reject</button>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        <h2 style={{ fontSize: '18px', margin: '30px 0 10px' }}>Post an announcement</h2>
         <div className="upload-card" style={{ marginBottom: '10px' }}>
           <input
             type="text"
@@ -307,4 +355,4 @@ export default function AdminPage() {
       </div>
     </>
   );
-    }
+          }
