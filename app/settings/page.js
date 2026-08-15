@@ -68,6 +68,14 @@ export default function SettingsPage() {
           </div>
         </Link>
 
+        <Link href="/earnings" className="settings-row">
+          <div className="settings-row-icon"><i className="fas fa-sack-dollar"></i></div>
+          <div>
+            <div className="settings-row-title">Earnings</div>
+            <div className="settings-row-sub">Tips received &amp; payout requests</div>
+          </div>
+        </Link>
+
         <button className="settings-row" onClick={toggleTheme}>
           <div className="settings-row-icon">
             <i className={theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'}></i>
@@ -118,4 +126,4 @@ export default function SettingsPage() {
       </div>
     </>
   );
-                       }
+          }
