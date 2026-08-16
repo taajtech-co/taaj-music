@@ -26,7 +26,6 @@ export default function ProfilePage() {
   const [tipAmount, setTipAmount] = useState('5');
   const [tipLoading, setTipLoading] = useState(false);
   const [tipError, setTipError] = useState('');
-  const [totalReceived, setTotalReceived] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -77,21 +76,8 @@ export default function ProfilePage() {
   useEffect(() => {
     if (bundle?.profile) {
       setDisplayNameDraft(bundle.profile.display_name || '');
-      if (currentUserId === bundle.profile.id) {
-        loadEarnings(bundle.profile.id);
-      }
     }
-  }, [bundle, currentUserId]);
-
-  const loadEarnings = async (artistId) => {
-    const { data } = await supabase
-      .from('tips')
-      .select('amount_kobo')
-      .eq('artist_id', artistId)
-      .eq('status', 'success');
-    const total = (data || []).reduce((sum, t) => sum + t.amount_kobo, 0);
-    setTotalReceived(total / 100);
-  };
+  }, [bundle]);
 
   const avatarUrl = (p) => {
     if (!p?.avatar_path) return null;
@@ -307,13 +293,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {isOwnProfile && totalReceived > 0 && (
-              <div className="card" style={{ cursor: 'default', marginBottom: '20px', background: 'rgba(47,209,197,0.1)', borderColor: 'var(--accent-2)' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>TOTAL TIPS RECEIVED</div>
-                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--accent-2)' }}>GH₵{totalReceived.toFixed(2)}</div>
-              </div>
-            )}
-
             {!isOwnProfile && currentUserId && (
               <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
                 <button
@@ -378,4 +357,4 @@ export default function ProfilePage() {
       </div>
     </>
   );
-}
+                                      }
