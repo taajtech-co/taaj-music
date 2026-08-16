@@ -38,7 +38,7 @@ export default function UploadPage() {
       setError('Please choose an audio file.');
       return;
     }
-    if (!file.type.startsWith('audio/')) {
+    if (!file.type.startsWith('audio/') && !/\.(mp3|wav|m4a|aac|flac|ogg|mp4)$/i.test(file.name)) {
       setError('Please upload an audio file (mp3, wav, m4a, etc).');
       return;
     }
@@ -155,7 +155,7 @@ export default function UploadPage() {
           </label>
           <input
             type="file"
-            accept="audio/*"
+            accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.mp4"
             onChange={(e) => setFile(e.target.files[0])}
             required
           />
@@ -182,4 +182,4 @@ export default function UploadPage() {
       </div>
     </>
   );
-    }
+                        }
