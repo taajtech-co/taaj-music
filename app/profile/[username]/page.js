@@ -14,7 +14,6 @@ export default function ProfilePage() {
   const { clearCached } = useDataCache();
 
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [currentUserEmail, setCurrentUserEmail] = useState(null);
   const [sessionChecked, setSessionChecked] = useState(false);
 
   const [editing, setEditing] = useState(false);
@@ -22,15 +21,9 @@ export default function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const [tipping, setTipping] = useState(false);
-  const [tipAmount, setTipAmount] = useState('5');
-  const [tipLoading, setTipLoading] = useState(false);
-  const [tipError, setTipError] = useState('');
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setCurrentUserId(data.session?.user.id || null);
-      setCurrentUserEmail(data.session?.user.email || null);
       setSessionChecked(true);
     });
   }, [username]);
@@ -127,36 +120,6 @@ export default function ProfilePage() {
     setEditing(false);
     setAvatarFile(null);
     refresh();
-  };
-
-  const sendTip = async () => {
-    if (!currentUserEmail || !bundle?.profile) return;
-    setTipError('');
-    setTipLoading(true);
-
-    try {
-      const res = await fetch('/api/tip/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: currentUserEmail,
-          amount: tipAmount,
-          artistId: bundle.profile.id,
-        }),
-      });
-      const json = await res.json();
-
-      if (!res.ok || json.error) {
-        setTipError(json.error || 'Could not start payment.');
-        setTipLoading(false);
-        return;
-      }
-
-      window.location.href = json.authorizationUrl;
-    } catch (err) {
-      setTipError('Something went wrong: ' + err.message);
-      setTipLoading(false);
-    }
   };
 
   const coverUrl = (song) => {
@@ -294,43 +257,13 @@ export default function ProfilePage() {
             </div>
 
             {!isOwnProfile && currentUserId && (
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                <button
-                  className={isFollowing ? 'btn btn-outline' : 'btn btn-primary'}
-                  onClick={toggleFollow}
-                >
-                  {isFollowing ? 'Following' : 'Follow'}
-                </button>
-                <button className="btn btn-outline" onClick={() => setTipping(!tipping)}>
-                  <i className="fas fa-heart" style={{ marginRight: '6px', color: '#E5484D' }}></i>
-                  Tip artist
-                </button>
-              </div>
-            )}
-
-            {tipping && (
-              <div className="upload-card" style={{ maxWidth: '360px', marginBottom: '20px' }}>
-                <div style={{ fontWeight: 700, marginBottom: '12px' }}>Send a tip</div>
-                <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
-                  Amount (GH₵)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={tipAmount}
-                  onChange={(e) => setTipAmount(e.target.value)}
-                />
-                {tipError && <div className="error-msg">{tipError}</div>}
-                <button
-                  className="btn btn-primary"
-                  onClick={sendTip}
-                  disabled={tipLoading}
-                  style={{ width: '100%', padding: '12px', borderRadius: '999px', marginTop: '15px' }}
-                >
-                  {tipLoading ? 'Starting payment...' : `Send GH₵${tipAmount || '0'}`}
-                </button>
-              </div>
+              <button
+                className={isFollowing ? 'btn btn-outline' : 'btn btn-primary'}
+                onClick={toggleFollow}
+                style={{ marginBottom: '30px' }}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
             )}
 
             <h2 className="section-title" style={{ fontSize: '18px', marginTop: isOwnProfile ? 0 : '10px' }}>
@@ -357,4 +290,4 @@ export default function ProfilePage() {
       </div>
     </>
   );
-                                      }
+      }
